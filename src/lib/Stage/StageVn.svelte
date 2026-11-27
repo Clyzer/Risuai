@@ -2,8 +2,9 @@
     // Drama: the story as a visual novel. One line per screen over the latest image of the story,
     // with the speaker's name, a typewriter reveal, and the card's own buttons as choices at the
     // end. The chat underneath stays mounted (invisible) so the card keeps working; see stageVn.ts.
-    import { ChevronLeftIcon } from '@lucide/svelte'
-    import { onDestroy, untrack } from 'svelte'
+    import { ArrowLeftIcon, ChevronLeftIcon, ScrollTextIcon } from '@lucide/svelte'
+    import { onDestroy, tick, untrack } from 'svelte'
+    import { backLayer } from './stageBack'
     import { language } from 'src/lang'
     import { readScene, type VnScene } from './stageVn'
 
@@ -26,11 +27,13 @@
 
     let { root, chatKey, fallbackSpeaker, userName, generating, portrait, portraitInFront, active = $bindable(false) }: Props = $props()
 
-    const EMPTY: VnScene = { beats: [], choices: [], newest: -Infinity, firstOfNewest: -1, ui: false, fixed: [] }
+    const EMPTY: VnScene = { beats: [], choices: [], newest: -Infinity, firstOfNewest: -1, ui: false, fixed: [], withHidden: new Set() }
     let scene = $state.raw<VnScene>(EMPTY)
     let index = $state(0)
     let shown = $state(0)
     let inputHeight = $state(72)
+    /** data-chat-index of the reply shown as the card draws it ("See full reply"), or null. */
+    let fullView = $state<number | null>(null)
 
     let lastNewest = -Infinity
     let lastChat = ''
@@ -83,7 +86,7 @@
             lastNewest = -Infinity
         }
         scene = next
-        active = !next.ui && next.beats.length > 0
+        active = fullView === null && !next.ui && next.beats.length > 0
         markFixed(active ? next.fixed : [])
         if (next.newest > lastNewest && next.firstOfNewest >= 0) {
             // A new reply (or a new playthrough) with its first line rendered: start there. Until
@@ -166,6 +169,25 @@
         }
     }
 
+    // "See full reply": the chat shows again at that reply, exactly as the card draws it (panels,
+    // newspaper, thoughts, interactive parts all work, they are the originals). Back returns here.
+    async function openFull(message: number) {
+        fullView = message
+        active = false
+        markFixed([])
+        await tick()
+        root?.querySelector(`.risu-chat[data-chat-index="${message}"]`)?.scrollIntoView({ block: 'start' })
+    }
+
+    function closeFull() {
+        fullView = null
+        rebuild()
+    }
+
+    $effect(() => {
+        if (fullView !== null) return backLayer(closeFull)
+    })
+
     function choose(target: HTMLElement) {
         target.click()
     }
@@ -176,6 +198,10 @@
 </script>
 
 <svelte:window onkeydown={onKey} />
+
+{#if fullView !== null}
+    <button class="stage-vn-return" onclick={closeFull}><ArrowLeftIcon size={16} />{language.stage.backToDrama}</button>
+{/if}
 
 {#if active && beat}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -216,6 +242,15 @@
                     <ChevronLeftIcon size={18} />
                 </button>
                 <span>{messagePos} / {messageBeats.length}</span>
+                <button
+                    class="stage-vn-full"
+                    class:has={scene.withHidden.has(beat.message)}
+                    aria-label={language.stage.fullReply}
+                    title={language.stage.fullReply}
+                    onclick={() => openFull(beat.message)}
+                >
+                    <ScrollTextIcon size={17} />
+                </button>
                 {#if atEnd && generating}
                     <span class="stage-vn-typing" aria-label={language.stage.writing}><i></i><i></i><i></i></span>
                 {:else if !atEnd}
@@ -351,6 +386,47 @@
     }
     .stage-vn-back:disabled {
         opacity: 0.3;
+    }
+    .stage-vn-full {
+        position: relative;
+        width: 36px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        color: var(--stage-muted);
+        opacity: 0.45;
+    }
+    .stage-vn-full.has {
+        opacity: 1;
+    }
+    .stage-vn-full.has::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        right: 6px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--stage-accent);
+    }
+    .stage-vn-return {
+        position: absolute;
+        top: calc(var(--stage-top-space, 56px) + env(safe-area-inset-top, 0px) + 8px);
+        left: 50%;
+        z-index: 36;
+        translate: -50% 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 38px;
+        padding: 0 16px;
+        border-radius: 999px;
+        background: var(--stage-accent);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        box-shadow: 0 6px 18px rgb(0 0 0 / 0.35);
     }
     .stage-vn-more {
         margin-left: auto;

@@ -48,6 +48,8 @@ export interface VnScene {
     ui: boolean
     /** Fixed panels of the card (a dock) that must stay visible over the novel. */
     fixed: HTMLElement[]
+    /** Messages (data-chat-index) with content the novel does not show: panels, thoughts, forms. */
+    withHidden: Set<number>
 }
 
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT', 'DETAILS', 'TABLE', 'PRE', 'CODE', 'SVG', 'CANVAS', 'VIDEO', 'AUDIO', 'IFRAME', 'HR', 'OBJECT'])
@@ -171,10 +173,12 @@ interface MessageResult {
     lines: { speaker: string | null; text: string; dialogue: boolean; italic: boolean; bg: string | null; sprite: string | null; place: string | null }[]
     choices: VnChoice[]
     formControls: number
+    /** Panels, tables, thoughts and similar content left out of the novel. */
+    skipped: number
 }
 
 function readCharMessage(body: Element, state: ReadState, fallbackSpeaker: string | null, fixed: HTMLElement[]): MessageResult {
-    const result: MessageResult = { lines: [], choices: [], formControls: 0 }
+    const result: MessageResult = { lines: [], choices: [], formControls: 0, skipped: 0 }
     const startBg = state.bg
 
     const pushLine = (speaker: string | null, text: string, dialogue: boolean, italic = false) => {
@@ -184,7 +188,11 @@ function readCharMessage(body: Element, state: ReadState, fallbackSpeaker: strin
     }
 
     const emit = (raw: string, el: Element | null) => {
-        if (!raw || isThought(raw, el)) return
+        if (!raw) return
+        if (isThought(raw, el)) {
+            result.skipped++
+            return
+        }
         // A name tag under a character's picture (Argenta's panels without their own line).
         if (state.afterPicture && isNameTag(raw)) {
             state.panelSpeaker = raw
@@ -195,7 +203,11 @@ function readCharMessage(body: Element, state: ReadState, fallbackSpeaker: strin
         const asideBlock = styledAside(raw, el)
         for (const line of raw.split('\n')) {
             const text = line.trim()
-            if (!text || !/[\p{L}\p{N}]/u.test(text) || isThought(text, null)) continue
+            if (!text || !/[\p{L}\p{N}]/u.test(text)) continue
+            if (isThought(text, null)) {
+                result.skipped++
+                continue
+            }
             if (asideBlock || styledAside(text, null)) {
                 pushLine(null, text.replace(/^\*+|\*+$/g, '').trim(), false, true)
                 continue
@@ -212,7 +224,10 @@ function readCharMessage(body: Element, state: ReadState, fallbackSpeaker: strin
     }
 
     const visit = (el: Element) => {
-        if (SKIP_TAGS.has(el.tagName)) return
+        if (SKIP_TAGS.has(el.tagName)) {
+            if (el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE' && el.tagName !== 'TEMPLATE' && (el.textContent ?? '').trim()) result.skipped++
+            return
+        }
         if (FORM_TAGS.has(el.tagName)) {
             result.formControls++
             return
@@ -306,7 +321,7 @@ export function readScene(
         .slice(-(opts.maxMessages ?? 4))
 
     const state: ReadState = { bg: null, sprite: null, place: null, panelSpeaker: null, afterPicture: false }
-    const scene: VnScene = { beats: [], choices: [], newest: -Infinity, firstOfNewest: -1, ui: false, fixed: [] }
+    const scene: VnScene = { beats: [], choices: [], newest: -Infinity, firstOfNewest: -1, ui: false, fixed: [], withHidden: new Set() }
 
     for (const [n, { el, index }] of messages.entries()) {
         const body = el.querySelector('.chattext')
@@ -324,6 +339,7 @@ export function readScene(
             const read = readCharMessage(body, state, opts.fallbackSpeaker, scene.fixed)
             const ui = read.choices.length + read.formControls > UI_CONTROLS
             if (!ui) read.lines.forEach((line, i) => scene.beats.push({ key: `${index}:${i}`, message: index, role, ...line }))
+            if (read.skipped > 0 || read.formControls > 0) scene.withHidden.add(index)
             if (isNewest) {
                 scene.choices = ui ? [] : read.choices
                 scene.ui = ui

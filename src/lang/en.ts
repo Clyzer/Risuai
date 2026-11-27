@@ -1855,6 +1855,8 @@ export const languageEnglish = {
         previous: "Previous",
         next: "Next",
         writing: "Writing…",
+        fullReply: "See full reply",
+        backToDrama: "Back to Drama",
         dramaLoreName: "🎭 Stage · Drama format",
         showIn: "Show in",
         kindDetected: "Detected from the card. Change it if it belongs in the other list.",
