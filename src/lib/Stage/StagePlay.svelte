@@ -304,6 +304,25 @@
     .stage-play :global(.risu-stage-bubble .chattext) {
         max-width: 100%;
     }
+    .stage-play :global(.risu-stage-act) {
+        min-width: 40px;
+        height: 36px;
+        padding: 0 10px;
+        display: inline-grid;
+        place-items: center;
+        border-radius: 999px;
+        color: var(--stage-muted);
+    }
+    .stage-play :global(.risu-stage-act.primary) {
+        padding: 0 18px;
+        background: var(--stage-accent);
+        color: #fff;
+        font-weight: 700;
+    }
+    .stage-play :global(.risu-stage-page) {
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+    }
     .stage-play :global(.risu-stage-tools) {
         display: flex;
         flex-wrap: wrap;
@@ -375,16 +394,48 @@
         background: transparent;
         color: var(--stage-muted);
     }
-    /* Risu's chat actions menu opens above the ⋯ button, as a raised sheet. */
+    /* Risu's chat actions menu (⋯) becomes a bottom sheet with large rows. */
     .stage-play :global(.risu-chat-input-bar .risu-chat-menu) {
-        left: 8px;
+        position: fixed;
+        top: auto;
+        left: 50%;
         right: auto;
-        bottom: calc(66px + env(safe-area-inset-bottom, 0px));
-        padding: 14px 18px;
-        border-radius: 16px;
+        bottom: 0;
+        z-index: 95;
+        width: 100%;
+        max-width: 640px;
+        max-height: 70vh;
+        overflow-y: auto;
+        translate: -50% 0;
+        gap: 0;
+        padding: 22px 10px calc(14px + env(safe-area-inset-bottom, 0px));
+        border-radius: 22px 22px 0 0;
         background: var(--stage-raised);
-        border: 1px solid var(--stage-line);
-        box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+        box-shadow: 0 -10px 40px rgb(0 0 0 / 0.5);
+    }
+    .stage-play :global(.risu-chat-input-bar .risu-chat-menu::before) {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        width: 40px;
+        height: 4px;
+        translate: -50% 0;
+        border-radius: 2px;
+        background: color-mix(in oklab, var(--risu-theme-textcolor) 25%, transparent);
+    }
+    .stage-play :global(.risu-chat-input-bar .risu-chat-menu > div) {
+        min-height: 52px;
+        padding: 0 12px;
+        border-radius: 12px;
+        font-size: 16px;
+    }
+    .stage-play :global(.risu-chat-input-bar .risu-chat-menu > div:active) {
+        background: var(--stage-surface);
+    }
+    .stage-play :global(.risu-chat-input-bar .risu-chat-menu > div > svg) {
+        flex: none;
+        color: var(--stage-muted);
     }
     .stage-play :global(.risu-chat-input-bar > textarea.text-input-area) {
         min-height: 44px;

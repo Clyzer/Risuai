@@ -303,4 +303,224 @@
         outline: 2px solid var(--stage-accent);
         outline-offset: 2px;
     }
+
+    /* ---- Shared parts of Stage's own pages and sheets ---- */
+    .stage-root :global(.stage-section) {
+        margin: 22px 0 8px;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        color: var(--stage-muted);
+    }
+    .stage-root :global(.stage-section:first-child) {
+        margin-top: 4px;
+    }
+    .stage-root :global(.stage-lead) {
+        margin: 0 0 12px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: color-mix(in oklab, var(--risu-theme-textcolor) 78%, transparent);
+    }
+    .stage-root :global(.stage-list) {
+        display: flex;
+        flex-direction: column;
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--stage-surface);
+    }
+    .stage-root :global(.stage-row) {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        min-height: 56px;
+        padding: 10px 14px;
+        text-align: left;
+        color: inherit;
+    }
+    .stage-root :global(.stage-list > .stage-row + .stage-row),
+    .stage-root :global(.stage-list > * + .stage-row) {
+        border-top: 1px solid var(--stage-line);
+    }
+    .stage-root :global(.stage-row.on) {
+        background: color-mix(in oklab, var(--stage-accent) 14%, transparent);
+    }
+    .stage-root :global(.stage-row-ic) {
+        flex: none;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--stage-raised);
+        color: var(--stage-muted);
+    }
+    .stage-root :global(.stage-row-ic img) {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .stage-root :global(.stage-row-text) {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .stage-root :global(.stage-row-text b) {
+        font-size: 15px;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .stage-root :global(.stage-row-text small) {
+        font-size: 13px;
+        color: var(--stage-muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    .stage-root :global(.stage-row-end) {
+        flex: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--stage-muted);
+        font-size: 14px;
+    }
+    .stage-root :global(.stage-field) {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--stage-muted);
+    }
+    .stage-root :global(.stage-field small) {
+        font-weight: 400;
+        line-height: 1.4;
+    }
+    .stage-root :global(.stage-input) {
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--stage-line);
+        background: var(--stage-surface);
+        color: var(--risu-theme-textcolor);
+        font-size: 16px;
+        font-weight: 400;
+    }
+    .stage-root :global(textarea.stage-input) {
+        min-height: 110px;
+        line-height: 1.5;
+        resize: vertical;
+    }
+    .stage-root :global(.stage-input:focus) {
+        outline: none;
+        border-color: var(--stage-accent);
+    }
+    .stage-root :global(.stage-switch) {
+        position: relative;
+        flex: none;
+        width: 48px;
+        height: 28px;
+        border-radius: 999px;
+        background: color-mix(in oklab, var(--risu-theme-textcolor) 20%, transparent);
+        transition: background 0.2s ease;
+    }
+    .stage-root :global(.stage-switch::after) {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #fff;
+        transition: translate 0.2s ease;
+    }
+    .stage-root :global(.stage-switch.on) {
+        background: var(--stage-accent);
+    }
+    .stage-root :global(.stage-switch.on::after) {
+        translate: 20px 0;
+    }
+    .stage-root :global(.stage-btn) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+        padding: 0 18px;
+        border-radius: 14px;
+        background: var(--stage-raised);
+        color: var(--risu-theme-textcolor);
+        font-size: 15px;
+        font-weight: 700;
+    }
+    .stage-root :global(.stage-btn.primary) {
+        background: var(--stage-accent);
+        color: #fff;
+    }
+    .stage-root :global(.stage-btn.danger) {
+        background: color-mix(in oklab, #e5484d 22%, transparent);
+        color: #ff8a8a;
+    }
+    .stage-root :global(.stage-btn.block) {
+        width: 100%;
+    }
+    .stage-root :global(.stage-btn:disabled) {
+        opacity: 0.45;
+    }
+    .stage-root :global(.stage-btns) {
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+    }
+    .stage-root :global(.stage-btns > .stage-btn) {
+        flex: 1;
+    }
+    .stage-root :global(.stage-search) {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 46px;
+        padding: 0 14px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        background: var(--stage-surface);
+        color: var(--stage-muted);
+    }
+    .stage-root :global(.stage-search input) {
+        flex: 1;
+        min-width: 0;
+        background: none;
+        border: 0;
+        outline: none;
+        font-size: 16px;
+        color: var(--risu-theme-textcolor);
+    }
+    .stage-root :global(.stage-pill-btn) {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: var(--stage-muted);
+    }
+    .stage-root :global(.stage-note) {
+        display: flex;
+        gap: 8px;
+        margin: 12px 0;
+        font-size: 13px;
+        line-height: 1.45;
+        color: var(--stage-muted);
+    }
 </style>

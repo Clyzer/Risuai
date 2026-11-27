@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ArrowLeft, ArrowLeftRightIcon, ArrowRight, BookmarkIcon, BotIcon, CopyIcon, PowerOff, GitBranch, HamburgerIcon, LanguagesIcon, MenuIcon, PencilIcon, RefreshCcwIcon, SplitIcon, TrashIcon, UserIcon, Volume2Icon, Scissors } from "@lucide/svelte"
+    import { ArrowLeft, ArrowLeftRightIcon, ArrowRight, BookmarkIcon, BotIcon, CopyIcon, PowerOff, GitBranch, HamburgerIcon, EllipsisIcon, LanguagesIcon, MenuIcon, PencilIcon, RefreshCcwIcon, SplitIcon, TrashIcon, UserIcon, Volume2Icon, Scissors } from "@lucide/svelte"
     import { aiLawApplies, changeChatTo, foldChatToMessage, getFileSrc, createChatCopyName } from "src/ts/globalApi.svelte"
     import { ColorSchemeTypeStore } from "src/ts/gui/colorscheme"
     import { longpress } from "src/ts/gui/longtouch"
@@ -15,6 +15,7 @@
     import { type Unsubscriber } from "svelte/store"
     import { v4 as uuidv4, v4 } from 'uuid'
     import { language } from "../../lang"
+    import StageSheet from "../Stage/StageSheet.svelte"
     import { alertClear, alertConfirm, alertInput, alertNormal, alertRequestData, alertWait } from "../../ts/alert"
     import { ParseMarkdown, type CbsConditions, type simpleCharacterArgument } from "../../ts/parser/parser.svelte"
     import { getCurrentCharacter, getCurrentChat, setCurrentChat, type MessageGenerationInfo, type StreamingDisplayOptimizationMode } from "../../ts/storage/database.svelte"
@@ -29,7 +30,10 @@
     let translating = $state(false)
     let editMode = $state(false)
     // Stage theme: message tools stay hidden until a long press (or right click), except where they are needed.
-    let stageToolsOpen = $state(false)
+    // Stage theme: the message's action sheet (long press, or ⋯ on the latest reply).
+    let stageActionsOpen = $state(false)
+    let stageMsgEl: HTMLElement | undefined = $state()
+    let stageCopied = $state(false)
     let statusMessage:string = $state('')
     let retranslate = $state(false)
     let editTranslationMode = $state(false)
@@ -87,6 +91,8 @@
         streamingOptimizationMode = 'off',
         rawStreamingText = message,
     }: Props = $props();
+    // Risu passes rerollIcon 'dynamic' to every message and hides it with CSS except on the latest.
+    let stageCanReroll = $derived(rerollIcon === true || (rerollIcon === 'dynamic' && role === 'char' && idx === totalLength - 1))
 
     let msgDisplay = $state('')
     let translated = $state(false)
@@ -132,6 +138,39 @@
                 DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message = msg
             }
         }
+    }
+
+    /** Starts a new playthrough from this message (Risu's "Branch"). */
+    async function branchFromHere(){
+        await sleep(1)
+        const currentChat = DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage]
+        
+        if(DBState.db.createFolderOnBranch && !currentChat.folderId){
+            const folderId = v4()
+            DBState.db.characters[selIdState.selId].chatFolders ??= []
+            DBState.db.characters[selIdState.selId].chatFolders.unshift({
+                id: folderId,
+                name: `Branches of ${currentChat.name}`,
+                folded: false,
+            })
+            currentChat.folderId = folderId
+        }
+        
+        const currentMessage = currentChat.message[idx]
+        const newChat = $state.snapshot(currentChat)
+        newChat.name = createChatCopyName(newChat.name, 'Branch')
+        newChat.id = v4()
+        newChat.message = newChat.message.slice(0, idx + 1)
+        newChat.message.push({
+            role: 'char',
+            data: '{{specialcomment::branchedfrom::' + currentChat.id + '::' + currentChat.name + '::' + currentMessage.chatId + '::}}',
+            isComment: true,
+            disabled: true,
+            chatId: v4(),
+        })
+
+        DBState.db.characters[selIdState.selId].chats.unshift(newChat)
+        changeChatTo(0)
     }
 
     async function edit(){
@@ -947,37 +986,7 @@
         </button>
     {/if}
 
-    <button class="flex items-center hover:text-blue-500 transition-colors" onclick={async () => {
-        await sleep(1)
-        const currentChat = DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage]
-        
-        if(DBState.db.createFolderOnBranch && !currentChat.folderId){
-            const folderId = v4()
-            DBState.db.characters[selIdState.selId].chatFolders ??= []
-            DBState.db.characters[selIdState.selId].chatFolders.unshift({
-                id: folderId,
-                name: `Branches of ${currentChat.name}`,
-                folded: false,
-            })
-            currentChat.folderId = folderId
-        }
-        
-        const currentMessage = currentChat.message[idx]
-        const newChat = $state.snapshot(currentChat)
-        newChat.name = createChatCopyName(newChat.name, 'Branch')
-        newChat.id = v4()
-        newChat.message = newChat.message.slice(0, idx + 1)
-        newChat.message.push({
-            role: 'char',
-            data: '{{specialcomment::branchedfrom::' + currentChat.id + '::' + currentChat.name + '::' + currentMessage.chatId + '::}}',
-            isComment: true,
-            disabled: true,
-            chatId: v4(),
-        })
-
-        DBState.db.characters[selIdState.selId].chats.unshift(newChat)
-        changeChatTo(0)
-    }}>
+    <button class="flex items-center hover:text-blue-500 transition-colors" onclick={branchFromHere}>
         <SplitIcon size={20}/>
         {#if showNames}
             <span class="ml-1">{language.branch}</span>
@@ -1275,21 +1284,90 @@
             <!-- Stage: no avatar or name column, so the card's own content gets the full width. -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div class="risu-stage-msg {role === 'user' ? 'risu-stage-user' : 'risu-stage-char'}"
+                 bind:this={stageMsgEl}
                  oncontextmenu={(e) => {
                     if ((e.target as HTMLElement)?.closest?.('a,button,input,textarea,select,label,[risu-btn],[risu-trigger]')) return
                     e.preventDefault()
-                    stageToolsOpen = !stageToolsOpen
+                    if (!isComment) stageActionsOpen = true
                  }}>
                 {#if role === 'user'}
                     <div class="risu-stage-bubble">{@render textBox()}</div>
                 {:else}
                     {@render textBox()}
                 {/if}
-                {#if stageToolsOpen || editMode || rerollIcon || (firstMessage && altGreeting)}
+                {#if editMode}
                     <div class="risu-stage-tools">
-                        {#if role !== 'user'}{@render genInfo()}{/if}
-                        {@render iconButtons()}
+                        <button class="risu-stage-act primary" onclick={toggleOriginalEdit}>{language.save}</button>
                     </div>
+                {:else if (stageCanReroll || (firstMessage && altGreeting)) && !isComment}
+                    <div class="risu-stage-tools">
+                        {#if DBState.db.swipe || altGreeting}
+                            <button class="risu-stage-act" aria-label={language.stage.previous} onclick={unReroll}><ArrowLeft size={20} /></button>
+                            {#if firstMessage && altGreeting}<span class="risu-stage-page">{currentPage}/{totalPages}</span>{/if}
+                            <button class="risu-stage-act" aria-label={language.reroll} onclick={onReroll}><ArrowRight size={20} /></button>
+                        {:else}
+                            <button class="risu-stage-act" aria-label={language.reroll} onclick={onReroll}><RefreshCcwIcon size={19} /></button>
+                        {/if}
+                        <button class="risu-stage-act" aria-label={language.stage.messageActions} onclick={() => (stageActionsOpen = true)}><EllipsisIcon size={20} /></button>
+                    </div>
+                {/if}
+                {#if stageActionsOpen}
+                    <StageSheet title={language.stage.messageActions} close={() => (stageActionsOpen = false)}>
+                        <div class="stage-list">
+                            {#if idx > -1}
+                                <button class="stage-row" disabled={originalEditControlDisabled} onclick={() => { stageActionsOpen = false; startOriginalEdit() }}>
+                                    <span class="stage-row-ic"><PencilIcon size={18} /></span><span class="stage-row-text"><b>{language.edit}</b></span>
+                                </button>
+                            {/if}
+                            {#if stageCanReroll}
+                                <button class="stage-row" onclick={() => { stageActionsOpen = false; onReroll() }}>
+                                    <span class="stage-row-ic"><RefreshCcwIcon size={18} /></span><span class="stage-row-text"><b>{language.reroll}</b></span>
+                                </button>
+                            {/if}
+                            <button class="stage-row" onclick={async () => {
+                                const text = (stageMsgEl?.querySelector('.chattext') as HTMLElement | null)?.innerText ?? message
+                                await navigator.clipboard?.writeText(text.trim())
+                                stageCopied = true
+                                setTimeout(() => { stageCopied = false; stageActionsOpen = false }, 700)
+                            }}>
+                                <span class="stage-row-ic"><CopyIcon size={18} /></span><span class="stage-row-text"><b>{stageCopied ? language.copied : language.copy}</b></span>
+                            </button>
+                            {#if idx > -1}
+                                <button class="stage-row" onclick={() => { stageActionsOpen = false; branchFromHere() }}>
+                                    <span class="stage-row-ic"><SplitIcon size={18} /></span><span class="stage-row-text"><b>{language.stage.branchHere}</b><small>{language.stage.branchHereHint}</small></span>
+                                </button>
+                            {/if}
+                            {#if DBState.db.translator !== ''}
+                                <button class="stage-row" disabled={translationViewControlsDisabled} onclick={() => { stageActionsOpen = false; toggleTranslation() }}>
+                                    <span class="stage-row-ic"><LanguagesIcon size={18} /></span><span class="stage-row-text"><b>{language.translate}</b></span>
+                                </button>
+                            {/if}
+                            {#if DBState.db.enableBookmark && idx > -1}
+                                <button class="stage-row" onclick={() => { stageActionsOpen = false; toggleBookmark() }}>
+                                    <span class="stage-row-ic"><BookmarkIcon size={18} /></span><span class="stage-row-text"><b>{language.bookmark}</b></span>
+                                </button>
+                            {/if}
+                            {#if idx > -1 && DBState.db.characters[selIdState.selId]?.type !== 'group' && DBState.db.characters[selIdState.selId]?.ttsMode && DBState.db.characters[selIdState.selId]?.ttsMode !== 'none'}
+                                <button class="stage-row" onclick={() => { stageActionsOpen = false; sayTTS(null, isOptimizedStreamingMessage ? rawStreamingText : message) }}>
+                                    <span class="stage-row-ic"><Volume2Icon size={18} /></span><span class="stage-row-text"><b>TTS</b></span>
+                                </button>
+                            {/if}
+                            {#if idx > -1}
+                                <button class="stage-row" onclick={() => {
+                                    stageActionsOpen = false
+                                    const chat = DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage]
+                                    chat.message[idx].disabled = !chat.message[idx].disabled
+                                }}>
+                                    <span class="stage-row-ic"><PowerOff size={18} /></span><span class="stage-row-text"><b>{language.disableMessage}</b><small>{language.stage.disableMessageHint}</small></span>
+                                </button>
+                            {/if}
+                            {#if idx > -1 && !$ConnectionOpenStore}
+                                <button class="stage-row" onclick={() => { stageActionsOpen = false; rm({ shiftKey: false } as MouseEvent) }}>
+                                    <span class="stage-row-ic" style="color:#ff8a8a"><TrashIcon size={18} /></span><span class="stage-row-text"><b style="color:#ff8a8a">{language.remove}</b></span>
+                                </button>
+                            {/if}
+                        </div>
+                    </StageSheet>
                 {/if}
             </div>
         {:else}

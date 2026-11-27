@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { backLayer } from '../Stage/stageBack'
 
     import Suggestion from './Suggestion.svelte';
     import { CameraIcon, DatabaseIcon, DicesIcon, GlobeIcon, ImagePlusIcon, LanguagesIcon, Laugh, MenuIcon, MicOffIcon, PackageIcon, Plus, RefreshCcwIcon, ReplyIcon, Send, StepForwardIcon, XIcon, BrainIcon, ArrowDown, SparkleIcon, CompassIcon, ChevronRightIcon, EllipsisIcon } from "@lucide/svelte";
@@ -508,6 +509,11 @@
     // Aurora opens the menu right above the composer; this measures how much
     // of the chat's scroll box is left above it so the menu can scroll instead
     // of being cut off. Other themes do not read the variable.
+    // Stage theme: the back gesture closes the chat actions menu first.
+    $effect(() => {
+        if (openMenu && DBState.db.theme === 'stage') return backLayer(() => (openMenu = false))
+    })
+
     function fitChatMenu(menu: HTMLElement) {
         const scroller = menu.closest('.default-chat-screen')
         const bar = menu.parentElement
