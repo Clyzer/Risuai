@@ -16,21 +16,21 @@
         XIcon,
     } from '@lucide/svelte'
     import { language } from 'src/lang'
-    import { DBState, ScrollToMessageStore, selectedCharID, SettingsMenuIndex, settingsOpen, CharConfigSubMenu } from 'src/ts/stores.svelte'
+    import { DBState, ScrollToMessageStore, selectedCharID } from 'src/ts/stores.svelte'
+    import { getModelInfo } from 'src/ts/model/modellist'
+    import type { StagePlayPage } from './stageNav.svelte'
     import { getIndicators, listVariables } from './stageIndicators'
 
     interface Props {
         close: () => void
         exit: () => void
         openStoryPage: () => void
-        openChatList: () => void
-        openModuleList: () => void
-        openEditor: () => void
-        openIndicators: () => void
-        openVariables: () => void
+        /** Opens one of the play screen's own pages (the drawer closes itself first). */
+        open: (page: StagePlayPage) => void
     }
 
-    let { close, exit, openStoryPage, openChatList, openModuleList, openEditor, openIndicators, openVariables }: Props = $props()
+    let { close, exit, openStoryPage, open }: Props = $props()
+    let modelName = $derived(getModelInfo(DBState.db.aiModel)?.fullName ?? DBState.db.aiModel)
 
     let char = $derived(DBState.db.characters[$selectedCharID])
     let chat = $derived(char?.chats?.[char.chatPage])
@@ -41,16 +41,6 @@
         position = Math.max(0, count - 1)
     })
 
-    function openSettings(index: number) {
-        close()
-        SettingsMenuIndex.set(index)
-        settingsOpen.set(true)
-    }
-
-    function openLorebook() {
-        CharConfigSubMenu.set(3)
-        openEditor()
-    }
 
     function jump(index: number) {
         if (count === 0) return
@@ -72,41 +62,35 @@
     </header>
 
     <div class="stage-drawer-rows">
-        <button class="stage-drawer-row" onclick={() => openSettings(12)}>
+        <button class="stage-drawer-row" onclick={() => open('persona')}>
             <UserIcon size={22} /><span>{language.persona}</span>
             <em>{DBState.db.username}</em><ChevronRightIcon size={18} />
         </button>
-        <button class="stage-drawer-row" onclick={openChatList}>
+        <button class="stage-drawer-row" onclick={() => open('playthroughs')}>
             <ListIcon size={22} /><span>{language.stage.playthroughs}</span>
             <em>{char?.chats?.length ?? 0}</em><ChevronRightIcon size={18} />
         </button>
-        <button class="stage-drawer-row" onclick={openModuleList}>
+        <button class="stage-drawer-row" onclick={() => open('modules')}>
             <BlocksIcon size={22} /><span>{language.modules}</span>
             <em>{(char?.modules?.length ?? 0) + (chat?.modules?.length ?? 0)}</em><ChevronRightIcon size={18} />
         </button>
-        <button class="stage-drawer-row" onclick={openLorebook}>
+        <button class="stage-drawer-row" onclick={() => open('lorebook')}>
             <BookOpenIcon size={22} /><span>{language.loreBook}</span>
             <em>{char?.globalLore?.length ?? 0}</em><ChevronRightIcon size={18} />
         </button>
-        <button class="stage-drawer-row" onclick={openIndicators}>
+        <button class="stage-drawer-row" onclick={() => open('indicators')}>
             <GaugeIcon size={22} /><span>{language.stage.indicators}</span>
             <em>{getIndicators(char).length || language.stage.none}</em><ChevronRightIcon size={18} />
         </button>
-        <button class="stage-drawer-row" onclick={openVariables}>
+        <button class="stage-drawer-row" onclick={() => open('variables')}>
             <BracesIcon size={22} /><span>{language.stage.variables}</span>
             <em>{listVariables(char, chat).length}</em><ChevronRightIcon size={18} />
         </button>
-        <button class="stage-drawer-row" onclick={() => openSettings(1)}>
+        <button class="stage-drawer-row" onclick={() => open('model')}>
             <SparklesIcon size={22} /><span>{language.stage.aiModel}</span>
-            <em>{DBState.db.aiModel}</em><ChevronRightIcon size={18} />
+            <em>{modelName}</em><ChevronRightIcon size={18} />
         </button>
-        <button
-            class="stage-drawer-row"
-            onclick={() => {
-                CharConfigSubMenu.set(0)
-                openEditor()
-            }}
-        >
+        <button class="stage-drawer-row" onclick={() => open('character')}>
             <UserPenIcon size={22} /><span>{language.stage.editCharacter}</span><ChevronRightIcon size={18} />
         </button>
         <button class="stage-drawer-row" onclick={openStoryPage}>

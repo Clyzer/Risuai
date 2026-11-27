@@ -12,15 +12,19 @@
     import { DBState, selectedCharID } from 'src/ts/stores.svelte'
     import DefaultChatScreen from '../ChatScreens/DefaultChatScreen.svelte'
     import BackgroundDom from '../ChatScreens/BackgroundDom.svelte'
-    import ChatList from '../Others/ChatList.svelte'
-    import ModuleChatMenu from '../Setting/Pages/Module/ModuleChatMenu.svelte'
     import StagePlayDrawer from './StagePlayDrawer.svelte'
     import StageCharacterEditor from './StageCharacterEditor.svelte'
     import StageIndicatorsHud from './StageIndicatorsHud.svelte'
     import StageIndicatorsPage from './StageIndicatorsPage.svelte'
     import StageVariablesPage from './StageVariablesPage.svelte'
     import { getIndicators } from './stageIndicators'
-    import { stageNav } from './stageNav.svelte'
+    import { stageNav, type StagePlayPage } from './stageNav.svelte'
+    import StagePlaythroughsPage from './StagePlaythroughsPage.svelte'
+    import StageModulesPage from './StageModulesPage.svelte'
+    import StagePersonaPage from './StagePersonaPage.svelte'
+    import StageModelPage from './StageModelPage.svelte'
+    import StageLorebookPage from './StageLorebookPage.svelte'
+    import StageCharacterPage from './StageCharacterPage.svelte'
     import { backLayer } from './stageBack'
     import { stageKind } from './stageKinds'
     import { readMode, saveMode, setDramaFormat } from './stageDrama'
@@ -29,12 +33,31 @@
     import { getUserName } from 'src/ts/util'
     import { getCharImage } from 'src/ts/characters'
 
+    // Risu's input menu asks for its chat list or module menu through these; Stage's pages answer.
     let openChatList = $state(false)
     let openModuleList = $state(false)
     let drawerOpen = $state(false)
-    let editorOpen = $state(false)
-    let indicatorsOpen = $state(false)
-    let variablesOpen = $state(false)
+    let page = $state<StagePlayPage | null>(null)
+    /** Risu's full character editor (scripts, regex, assets...), opened from Stage's own editor. */
+    let fullEditorOpen = $state(false)
+
+    $effect(() => {
+        if (openChatList) {
+            openChatList = false
+            page = 'playthroughs'
+        }
+    })
+    $effect(() => {
+        if (openModuleList) {
+            openModuleList = false
+            page = 'modules'
+        }
+    })
+
+    function openPage(next: StagePlayPage) {
+        drawerOpen = false
+        page = next
+    }
     let barHidden = $state(false)
 
     let char = $derived(DBState.db.characters[$selectedCharID])
@@ -119,20 +142,12 @@
     $effect(() => {
         if (drawerOpen) return backLayer(() => (drawerOpen = false))
     })
+    // Stage's own pages register their back step themselves (StagePage); these two do not.
     $effect(() => {
-        if (editorOpen) return backLayer(() => (editorOpen = false))
+        if (page === 'indicators' || page === 'variables') return backLayer(() => (page = null))
     })
     $effect(() => {
-        if (indicatorsOpen) return backLayer(() => (indicatorsOpen = false))
-    })
-    $effect(() => {
-        if (variablesOpen) return backLayer(() => (variablesOpen = false))
-    })
-    $effect(() => {
-        if (openChatList) return backLayer(() => (openChatList = false))
-    })
-    $effect(() => {
-        if (openModuleList) return backLayer(() => (openModuleList = false))
+        if (fullEditorOpen) return backLayer(() => (fullEditorOpen = false))
     })
 
     function openStoryPage() {
@@ -199,49 +214,30 @@
         {/if}
 
         {#if drawerOpen}
-            <StagePlayDrawer
-                close={() => (drawerOpen = false)}
-                exit={back}
-                openStoryPage={openStoryPage}
-                openChatList={() => {
-                    drawerOpen = false
-                    openChatList = true
-                }}
-                openModuleList={() => {
-                    drawerOpen = false
-                    openModuleList = true
-                }}
-                openEditor={() => {
-                    drawerOpen = false
-                    editorOpen = true
-                }}
-                openIndicators={() => {
-                    drawerOpen = false
-                    indicatorsOpen = true
-                }}
-                openVariables={() => {
-                    drawerOpen = false
-                    variablesOpen = true
-                }}
-            />
+            <StagePlayDrawer close={() => (drawerOpen = false)} exit={back} {openStoryPage} open={openPage} />
         {/if}
 
-        {#if editorOpen}
-            <StageCharacterEditor close={() => (editorOpen = false)} />
+        {#if page === 'playthroughs'}
+            <StagePlaythroughsPage close={() => (page = null)} />
+        {:else if page === 'modules'}
+            <StageModulesPage close={() => (page = null)} />
+        {:else if page === 'persona'}
+            <StagePersonaPage close={() => (page = null)} />
+        {:else if page === 'model'}
+            <StageModelPage close={() => (page = null)} />
+        {:else if page === 'lorebook'}
+            <StageLorebookPage close={() => (page = null)} />
+        {:else if page === 'character'}
+            <StageCharacterPage close={() => (page = null)} openFullEditor={() => (fullEditorOpen = true)} />
+        {:else if page === 'indicators'}
+            <StageIndicatorsPage close={() => (page = null)} />
+        {:else if page === 'variables'}
+            <StageVariablesPage close={() => (page = null)} />
         {/if}
-        {#if indicatorsOpen}
-            <StageIndicatorsPage close={() => (indicatorsOpen = false)} />
-        {/if}
-        {#if variablesOpen}
-            <StageVariablesPage close={() => (variablesOpen = false)} />
+        {#if fullEditorOpen}
+            <StageCharacterEditor close={() => (fullEditorOpen = false)} />
         {/if}
     </div>
-
-    {#if openChatList}
-        <ChatList close={() => (openChatList = false)} />
-    {:else if openModuleList}
-        <ModuleChatMenu close={() => (openModuleList = false)} />
-    {/if}
 {/if}
 
 

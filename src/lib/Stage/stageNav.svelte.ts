@@ -4,6 +4,8 @@ import type { ImportPreview } from './stageImportPreview'
 
 export type StageTab = 'home' | 'chats' | 'realm' | 'you'
 export type StageHomeView = 'stories' | 'playthroughs'
+/** Stage's own pages of the play screen (the play menu opens them). */
+export type StagePlayPage = 'persona' | 'playthroughs' | 'modules' | 'lorebook' | 'indicators' | 'variables' | 'model' | 'character'
 
 export const stageNav = $state({
     tab: 'home' as StageTab,

@@ -345,6 +345,16 @@
     .stage-root :global(.stage-row.on) {
         background: color-mix(in oklab, var(--stage-accent) 14%, transparent);
     }
+    .stage-root :global(.stage-row-main) {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        align-self: stretch;
+        text-align: left;
+        color: inherit;
+    }
     .stage-root :global(.stage-row-ic) {
         flex: none;
         width: 36px;
