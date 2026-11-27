@@ -9,6 +9,7 @@
 import { untrack } from 'svelte'
 import { get } from 'svelte/store'
 import { alertStore, DBState, settingsOpen } from 'src/ts/stores.svelte'
+import { STAGE_ALERTS } from './stageAlerts'
 
 type Layer = { close: () => void }
 
@@ -54,9 +55,10 @@ export function startStageBack() {
         pushGuard()
     }
 
+    // Dialogs Stage shows as its own sheets close themselves (StageSheet); the rest are Risu's.
     let unregisterAlert: (() => void) | null = null
     alertStore.subscribe((alert) => {
-        const open = alert.type !== 'none' && alert.type !== 'toast'
+        const open = alert.type !== 'none' && alert.type !== 'toast' && !STAGE_ALERTS.has(alert.type)
         if (open && !unregisterAlert && DBState.db?.theme === 'stage') {
             unregisterAlert = backLayer(() => {
                 const current = get(alertStore)
