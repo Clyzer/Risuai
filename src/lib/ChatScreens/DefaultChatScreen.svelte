@@ -681,7 +681,7 @@
 
                 {#if $doingChat || doingChatInputTranslate}
                     <button
-                            aria-labelledby="cancel"
+                            aria-label={language.stage.stopReply}
                             class="peer-focus:border-textcolor  flex justify-center border-y border-darkborderc items-center text-textcolor p-3 hover:bg-blue-500 hover:text-white transition-colors" onclick={abortChat}
                             style:height={inputHeight}
                     >
@@ -690,6 +690,7 @@
                 {:else}
                     <button
                             onclick={send}
+                            aria-label={language.stage.sendMessage}
                             class="flex justify-center border-y border-darkborderc items-center text-textcolor p-3 peer-focus:border-textcolor hover:bg-blue-500 hover:text-white transition-colors button-icon-send"
                             style:height={inputHeight}
                     >

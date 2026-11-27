@@ -1969,6 +1969,8 @@ export const languageEnglish = {
         download: "Download",
         openOnWeb: "Open on the web",
         typing: "typing…",
+        sendMessage: "Send",
+        stopReply: "Stop the reply",
         backToDrama: "Back to Drama",
         dramaLoreName: "🎭 Stage · Drama format",
         showIn: "Show in",

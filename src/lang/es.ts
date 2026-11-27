@@ -1821,6 +1821,8 @@ export const languageSpanish = {
         download: "Descargar",
         openOnWeb: "Ver en la web",
         typing: "escribiendo…",
+        sendMessage: "Enviar",
+        stopReply: "Detener la respuesta",
         backToDrama: "Volver al Drama",
         dramaLoreName: "🎭 Stage · Formato de Drama",
         showIn: "Mostrar en",
