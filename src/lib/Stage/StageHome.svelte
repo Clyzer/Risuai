@@ -9,8 +9,9 @@
     import { stageNav } from './stageNav.svelte'
     import { listCharacters, listPlaythroughs, timeAgo, type StagePlaythroughEntry } from './stageData'
 
-    let characters = $derived(listCharacters(DBState.db.characters))
-    let playthroughs = $derived(stageNav.homeView === 'playthroughs' ? listPlaythroughs(DBState.db.characters) : [])
+    // Home lists stories; one-on-one characters live in the Chats tab.
+    let characters = $derived(listCharacters(DBState.db.characters).filter((c) => c.kind === 'story'))
+    let playthroughs = $derived(stageNav.homeView === 'playthroughs' ? listPlaythroughs(DBState.db.characters).filter((p) => p.kind === 'story') : [])
     let latest = $derived([...characters].filter((c) => c.lastPlayed > 0).sort((a, b) => b.lastPlayed - a.lastPlayed)[0])
     // Which stories have something to check (a module that looks missing, a link to a deleted module).
     let attention = $derived(

@@ -2,9 +2,7 @@
     // Stage theme shell: a phone-first launcher around Risu. It only reads the database and calls
     // the functions Risu already exposes; chat processing and storage are untouched.
     import { DBState, OpenRealmStore, selectedCharID } from 'src/ts/stores.svelte'
-    import MobileHeader from '../Mobile/MobileHeader.svelte'
-    import MobileBody from '../Mobile/MobileBody.svelte'
-    import MobileFooter from '../Mobile/MobileFooter.svelte'
+    import StagePlay from './StagePlay.svelte'
     import RealmMain from '../UI/Realm/RealmMain.svelte'
     import StageTabBar from './StageTabBar.svelte'
     import StageHome from './StageHome.svelte'
@@ -68,12 +66,7 @@
 
 <div class="stage-root">
     {#if $selectedCharID >= 0}
-        <!-- Phase 1: the chat keeps Risu's mobile screen until the Stage play screen lands (phase 4). -->
-        <div class="stage-legacy-chat">
-            <MobileHeader />
-            <MobileBody />
-            <MobileFooter />
-        </div>
+        <StagePlay />
     {:else if stageNav.startPicker !== null && DBState.db.characters[stageNav.startPicker]}
         <div class="stage-shell">
             <StageStartPicker index={stageNav.startPicker} />
@@ -124,12 +117,6 @@
         min-width: 0;
         background: color-mix(in oklab, var(--risu-theme-darkbg) 80%, #000);
         color: var(--risu-theme-textcolor);
-    }
-    .stage-legacy-chat {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100%;
     }
     /* Phone width everywhere; on a wide screen the app sits in a centered column. */
     .stage-shell {

@@ -27,6 +27,7 @@
     import { continueStory, importModuleForStory, linkModule, startNewPlaythrough, unlinkMissingModules } from './stageActions'
     import { changeChar } from 'src/ts/characters'
     import { startMode } from './stageStarts'
+    import { isKindOverridden, setStageKind, stageKind } from './stageKinds'
 
     interface Props {
         index: number
@@ -41,6 +42,8 @@
     let moduleImages = $derived((req?.linked ?? []).concat(req?.global ?? []).reduce((n, m) => n + m.assetCount, 0))
     let hasPlayed = $derived(playthroughs.length > 0)
     let mode = $derived(char ? startMode(char) : 'single')
+    let kind = $derived(char ? stageKind(char) : 'story')
+    let kindOverridden = $derived(char ? isKindOverridden(char) : false)
     // Notes written in one language get no language tabs (MultiLangDisplay would show "Unknown Language").
     let multiLangNotes = $derived(Object.keys(parseMultilangString(char?.creatorNotes ?? '')).some((k) => k !== 'xx'))
     let greetingCount = $derived(1 + (char?.alternateGreetings ?? []).filter((g) => g?.trim()).length)
@@ -84,6 +87,13 @@
                     <div><b>{char.globalLore?.length ?? 0}</b><span>{language.stage.loreEntries}</span></div>
                     <div><b>{(ownImages + moduleImages).toLocaleString()}</b><span>{language.stage.images}</span></div>
                 </div>
+
+                <div class="stage-section-title">{language.stage.showIn}</div>
+                <div class="stage-kind" role="radiogroup" aria-label={language.stage.showIn}>
+                    <button role="radio" aria-checked={kind === 'story'} class:on={kind === 'story'} onclick={() => setStageKind(DBState.db.characters[index], 'story')}>{language.stage.stories}</button>
+                    <button role="radio" aria-checked={kind === 'chat'} class:on={kind === 'chat'} onclick={() => setStageKind(DBState.db.characters[index], 'chat')}>{language.stage.chats}</button>
+                </div>
+                <p class="stage-note"><span>{kindOverridden ? language.stage.kindChosen : language.stage.kindDetected}</span></p>
 
                 <div class="stage-section-title">{language.stage.howToStart}</div>
                 {#if mode === 'ownMenu'}
@@ -327,6 +337,24 @@
         font-size: 12px;
         color: var(--stage-muted);
         text-align: center;
+    }
+    .stage-kind {
+        display: flex;
+        padding: 4px;
+        border-radius: 999px;
+        background: var(--stage-surface);
+    }
+    .stage-kind button {
+        flex: 1;
+        height: 40px;
+        border-radius: 999px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--stage-muted);
+    }
+    .stage-kind button.on {
+        background: var(--risu-theme-textcolor);
+        color: var(--stage-bg);
     }
     .stage-section-title {
         padding: 20px 0 8px;

@@ -1,5 +1,6 @@
 // Read-only views over the database for the Stage theme. Nothing here writes to the database.
 import type { Chat, character, groupChat } from 'src/ts/storage/database.svelte'
+import { stageKind, type StageKind } from './stageKinds'
 
 /**
  * Risu always keeps at least one chat per character, so an imported card already has an empty
@@ -27,6 +28,7 @@ export interface StageCharacterEntry {
     lastInteraction: number
     /** Last time one of its playthroughs was opened, 0 when none was started. */
     lastPlayed: number
+    kind: StageKind
 }
 
 export interface StagePlaythroughEntry {
@@ -38,6 +40,7 @@ export interface StagePlaythroughEntry {
     messageCount: number
     lastDate: number
     isBranch: boolean
+    kind: StageKind
 }
 
 function isListed(c: character | groupChat) {
@@ -55,6 +58,7 @@ export function listCharacters(chars: (character | groupChat)[]): StageCharacter
             chatCount: (c.chats ?? []).filter(isStarted).length,
             lastInteraction: c.lastInteraction || 0,
             lastPlayed: (c.chats ?? []).some(isStarted) ? c.lastInteraction || 0 : 0,
+            kind: stageKind(c),
         }))
         .sort((a, b) => b.lastInteraction - a.lastInteraction || a.name.localeCompare(b.name))
 }
@@ -76,6 +80,7 @@ export function listPlaythroughs(chars: (character | groupChat)[]): StagePlaythr
                 // of a character was used when the character was, so it borrows lastInteraction.
                 lastDate: chat.lastDate || (chatIndex === (c.chatPage ?? 0) ? c.lastInteraction || 0 : 0),
                 isBranch: /\((Branch)( \d+)?\)$/.test(chat.name ?? ''),
+                kind: stageKind(c),
             })
         })
     })

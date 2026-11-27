@@ -28,6 +28,8 @@
 
     let translating = $state(false)
     let editMode = $state(false)
+    // Stage theme: message tools stay hidden until a long press (or right click), except where they are needed.
+    let stageToolsOpen = $state(false)
     let statusMessage:string = $state('')
     let retranslate = $state(false)
     let editTranslationMode = $state(false)
@@ -1269,6 +1271,27 @@
                     {@render textBox()}
                 </div>
             {/if}
+        {:else if DBState.db.theme === 'stage' && !blankMessage && DBState.db.characters[selIdState.selId]?.chaId !== "§playground"}
+            <!-- Stage: no avatar or name column, so the card's own content gets the full width. -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <div class="risu-stage-msg {role === 'user' ? 'risu-stage-user' : 'risu-stage-char'}"
+                 oncontextmenu={(e) => {
+                    if ((e.target as HTMLElement)?.closest?.('a,button,input,textarea,select,label,[risu-btn],[risu-trigger]')) return
+                    e.preventDefault()
+                    stageToolsOpen = !stageToolsOpen
+                 }}>
+                {#if role === 'user'}
+                    <div class="risu-stage-bubble">{@render textBox()}</div>
+                {:else}
+                    {@render textBox()}
+                {/if}
+                {#if stageToolsOpen || editMode || rerollIcon || (firstMessage && altGreeting)}
+                    <div class="risu-stage-tools">
+                        {#if role !== 'user'}{@render genInfo()}{/if}
+                        {@render iconButtons()}
+                    </div>
+                {/if}
+            </div>
         {:else}
             {@render senderIcon({rounded: DBState.db.roundIcons})}
             <span class="flex flex-col ml-4 w-full max-w-full min-w-0 text-black">
