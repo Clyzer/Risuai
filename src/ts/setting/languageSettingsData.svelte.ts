@@ -221,7 +221,8 @@ export const languageSettingsItems: SettingItem[] = [
         labelKey: 'autoTranslation',
         bindKey: 'autoTranslate',
         classes: 'mt-2',
-        condition: (ctx) => !!ctx.db.translator,
+        // Also shown while it is on with no translator language, so it can always be turned off.
+        condition: (ctx) => !!ctx.db.translator || !!ctx.db.autoTranslate,
     },
 
     {

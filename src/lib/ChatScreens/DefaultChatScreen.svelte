@@ -404,7 +404,7 @@
     });
 
     async function updateInputTransateMessage(reverse: boolean) {
-        if(!DBState.db.useAutoTranslateInput){
+        if(!DBState.db.useAutoTranslateInput || !DBState.db.translator){
             return
         }
         if(isExpTranslator()){
@@ -805,7 +805,7 @@
                             {/if}
                         {/if}
                         
-                        {#if DBState.db.translator !== ''}
+                        {#if DBState.db.translator !== '' || DBState.db.useAutoTranslateInput}
                             <div class={"flex items-center cursor-pointer "+ (DBState.db.useAutoTranslateInput ? 'text-green-500':'lg:hover:text-green-500')} onclick={() => {
                                 DBState.db.useAutoTranslateInput = !DBState.db.useAutoTranslateInput
                             }}>
@@ -877,7 +877,7 @@
                     </div>
                 {/if}
             </div>
-            {#if DBState.db.useAutoTranslateInput && DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
+            {#if DBState.db.useAutoTranslateInput && DBState.db.translator && DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
                 <div class="flex items-center mt-2 mb-2">
                     <label for='messageInputTranslate' class="text-textcolor ml-4">
                         <LanguagesIcon />

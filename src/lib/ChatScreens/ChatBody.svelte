@@ -80,7 +80,8 @@
                 lastChatId = chatID
                 let translateText = false
                 try {
-                    if(DBState.db.autoTranslate){
+                    // No translator language means translation is off, even if the toggle was left on.
+                    if(DBState.db.autoTranslate && DBState.db.translator){
                         if(DBState.db.autoTranslateCachedOnly && DBState.db.translatorType === 'llm'){
                             const cache = DBState.db.translateBeforeHTMLFormatting
                             ? await getLLMCache(data)
