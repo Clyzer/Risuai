@@ -89,7 +89,7 @@
         flex: 1;
         min-height: 0;
         overflow-y: auto;
-        padding: 14px 16px 28px;
+        padding: 14px 16px calc(28px + env(safe-area-inset-bottom, 0px));
     }
     .stage-sub-lead {
         margin: 0 0 12px;

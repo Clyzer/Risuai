@@ -21,6 +21,7 @@
     import StageVariablesPage from './StageVariablesPage.svelte'
     import { getIndicators } from './stageIndicators'
     import { stageNav } from './stageNav.svelte'
+    import { backLayer } from './stageBack'
     import { stageKind } from './stageKinds'
     import { applyStep, buildSteps, clearMarks, isInteractiveTarget, readMode, saveMode, type DramaStep } from './stageDrama'
 
@@ -156,6 +157,27 @@
         }
         selectedCharID.set(-1)
     }
+
+    // Back gesture: closes the open sub page or menu first, then leaves the playthrough.
+    $effect(() => backLayer(back))
+    $effect(() => {
+        if (drawerOpen) return backLayer(() => (drawerOpen = false))
+    })
+    $effect(() => {
+        if (editorOpen) return backLayer(() => (editorOpen = false))
+    })
+    $effect(() => {
+        if (indicatorsOpen) return backLayer(() => (indicatorsOpen = false))
+    })
+    $effect(() => {
+        if (variablesOpen) return backLayer(() => (variablesOpen = false))
+    })
+    $effect(() => {
+        if (openChatList) return backLayer(() => (openChatList = false))
+    })
+    $effect(() => {
+        if (openModuleList) return backLayer(() => (openModuleList = false))
+    })
 
     function openStoryPage() {
         const index = $selectedCharID

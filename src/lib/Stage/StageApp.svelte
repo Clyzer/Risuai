@@ -12,7 +12,12 @@
     import StageStartPicker from './StageStartPicker.svelte'
     import StageImportReview from './StageImportReview.svelte'
     import StageSaveNotice from './StageSaveNotice.svelte'
+    import StagePullRefresh from './StagePullRefresh.svelte'
+    import { onMount } from 'svelte'
     import { stageNav } from './stageNav.svelte'
+    import { closeReview } from './stageActions'
+    import { backLayer, startStageBack } from './stageBack'
+    import { defaultColorScheme } from 'src/ts/gui/colorscheme'
     import { language } from 'src/lang'
 
     // Over plain HTTP on a LAN address the browser hides crypto.subtle. Ordinary imports survive it
@@ -55,6 +60,45 @@
         if (stageNav.detail !== null && !DBState.db.characters[stageNav.detail]) {
             stageNav.detail = null
         }
+    })
+
+    // Edge to edge: the installed app draws under the status and navigation bars, and every Stage
+    // screen pads itself with the system insets (Risu's own screens get them from the rule below).
+    onMount(() => {
+        const viewport = document.querySelector<HTMLMetaElement>('meta[name="viewport"]')
+        if (viewport && !viewport.content.includes('viewport-fit')) {
+            viewport.content = `${viewport.content}, viewport-fit=cover`
+        }
+        document.documentElement.classList.add('risu-stage-edge')
+    })
+
+    // Back gesture: each open screen closes in turn; from another tab it returns to Home first.
+    startStageBack()
+    $effect(() => {
+        if (stageNav.tab !== 'home') return backLayer(() => (stageNav.tab = 'home'))
+    })
+    $effect(() => {
+        if (stageNav.detail !== null) return backLayer(() => (stageNav.detail = null))
+    })
+    $effect(() => {
+        if (stageNav.startPicker !== null) return backLayer(() => (stageNav.startPicker = null))
+    })
+    $effect(() => {
+        if (stageNav.importReview) return backLayer(closeReview)
+    })
+
+    // Installed app: Android paints the status bar with the page's theme-color, so it follows the
+    // Stage background of the current color scheme. (The navigation bar takes the manifest's
+    // theme_color, which cannot change at run time.)
+    $effect(() => {
+        const color = DBState.db.colorScheme?.darkbg || defaultColorScheme.darkbg
+        let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+        if (!meta) {
+            meta = document.createElement('meta')
+            meta.name = 'theme-color'
+            document.head.appendChild(meta)
+        }
+        meta.content = color
     })
 
     // "Import from Realm" in Risu's add-character dialog asks the app to show Realm.
@@ -107,6 +151,7 @@
         </div>
     {/if}
     <StageSaveNotice />
+    <StagePullRefresh />
 </div>
 
 <style>
@@ -178,6 +223,13 @@
     .stage-realm {
         height: 100%;
         overflow-y: auto;
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+    /* Risu's own screens shown while Stage is the theme (settings, first-run setup) keep clear of
+       the system bars. Stage's screens pad themselves. */
+    :global(html.risu-stage-edge main:not(:has(> .stage-root))) {
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     /* Shared building blocks for the Stage pages. */
