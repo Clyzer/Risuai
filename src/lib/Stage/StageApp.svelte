@@ -1,7 +1,7 @@
 <script lang="ts">
     // Stage theme shell: a phone-first launcher around Risu. It only reads the database and calls
     // the functions Risu already exposes; chat processing and storage are untouched.
-    import { OpenRealmStore, selectedCharID } from 'src/ts/stores.svelte'
+    import { DBState, OpenRealmStore, selectedCharID } from 'src/ts/stores.svelte'
     import MobileHeader from '../Mobile/MobileHeader.svelte'
     import MobileBody from '../Mobile/MobileBody.svelte'
     import MobileFooter from '../Mobile/MobileFooter.svelte'
@@ -13,10 +13,11 @@
     import { stageNav } from './stageNav.svelte'
     import { language } from 'src/lang'
 
-    // Over plain HTTP on a LAN address the browser hides crypto.subtle, and importing fails
-    // without any message because every saved asset is hashed with it (hasher in parser.svelte.ts).
-    // Check that API directly (a browser flag can enable it) instead of isSecureContext.
-    const missingApis = typeof window === 'undefined' || window.crypto?.subtle ? [] : ['crypto.subtle']
+    // Over plain HTTP on a LAN address the browser hides crypto.subtle. Ordinary imports survive it
+    // (saveAsset falls back to a uuid), but with account sync on, a .charx import first hashes the
+    // whole file (CharXSkippableChecker) and stops there without any message. Warn only in that case.
+    const noSubtle = typeof window !== 'undefined' && !window.crypto?.subtle
+    let charxImportBlocked = $derived(noSubtle && !!DBState.db.account?.useSync)
     const dismissKey = 'risu-stage-insecure-dismissed:' + (typeof location !== 'undefined' ? location.origin : '')
     let insecureDismissed = $state(readDismissed())
 
@@ -53,12 +54,11 @@
         </div>
     {:else}
         <div class="stage-shell">
-            {#if missingApis.length > 0 && !insecureDismissed}
+            {#if charxImportBlocked && !insecureDismissed}
                 <div class="stage-insecure" role="alert">
                     <div>
                         <b>{language.stage.insecureTitle}</b>
                         <span>{language.stage.insecureBody}</span>
-                        <small>{missingApis.join(' · ')}</small>
                     </div>
                     <button aria-label={language.close} onclick={dismissInsecure}>✕</button>
                 </div>
@@ -139,11 +139,6 @@
     }
     .stage-insecure b {
         font-size: 14px;
-    }
-    .stage-insecure small {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 11px;
-        opacity: 0.8;
     }
     .stage-insecure button {
         flex: none;

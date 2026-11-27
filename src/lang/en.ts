@@ -1791,7 +1791,7 @@ export const languageEnglish = {
         playthroughCount: "{} playthroughs",
         themeStage: "Stage",
         insecureTitle: "Insecure connection",
-        insecureBody: "This address is not HTTPS, so the browser blocks features Risu needs to import cards and save images. Open Risu over HTTPS, or from localhost on this computer.",
+        insecureBody: "With Risu account sync on, importing .charx files needs a secure connection, and this address is not HTTPS. Open Risu over HTTPS, or from localhost on this computer.",
     },
 } satisfies I18nTranslation;
 

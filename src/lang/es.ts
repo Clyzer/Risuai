@@ -1516,6 +1516,6 @@ export const languageSpanish = {
         playthroughCount: "{} partidas",
         themeStage: "Stage",
         insecureTitle: "Conexión no segura",
-        insecureBody: "Esta dirección no es HTTPS, así que el navegador bloquea funciones que Risu necesita para importar tarjetas y guardar imágenes. Abre Risu con HTTPS, o desde localhost en esta computadora.",
+        insecureBody: "Con la sincronización de la cuenta de Risu activada, importar archivos .charx necesita una conexión segura, y esta dirección no es HTTPS. Abre Risu con HTTPS, o desde localhost en esta computadora.",
     },
 } satisfies DeepPartial<typeof import('./en').languageEnglish>;
