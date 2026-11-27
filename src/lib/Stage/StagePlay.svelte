@@ -87,12 +87,18 @@
         }
     })
 
+    // One-on-one chats read like a messaging app in Novel mode (bubbles, the character's photo,
+    // "typing…" until the first words of a reply arrive).
+    // Drama is for stories: one-on-one chats always read as messages.
+    let isChat = $derived(!!char && stageKind(char) === 'chat')
+    let messenger = $derived(isChat && mode === 'novel')
+
     let currentChaId = ''
     $effect(() => {
         const id = char?.chaId ?? ''
         if (id !== currentChaId) {
             currentChaId = id
-            mode = id ? readMode(id) : 'novel'
+            mode = id && !untrack(() => isChat) ? readMode(id) : 'novel'
         }
     })
 
@@ -174,10 +180,20 @@
 {#if char}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="stage-play" class:vn={mode === 'drama' && vnActive} bind:this={playEl} onscrollcapture={onScroll} style:--stage-top-space={indicators.length > 0 ? '100px' : '56px'}>
+    <div
+        class="stage-play"
+        class:vn={mode === 'drama' && vnActive}
+        class:messenger
+        class:generating={$doingChat}
+        bind:this={playEl}
+        onscrollcapture={onScroll}
+        style:--stage-top-space={indicators.length > 0 ? '100px' : '56px'}
+        style:--stage-avatar={messenger && portrait && char.type !== 'group' ? `url("${portrait.replace(/"/g, '%22')}")` : 'none'}
+    >
         <div class="stage-play-bg"><BackgroundDom /></div>
         <div class="stage-play-chat">
             <DefaultChatScreen bind:openChatList bind:openModuleList />
+
             {#if mode === 'drama'}
                 <StageVn
                     root={chatRoot}
@@ -196,14 +212,19 @@
             <button class="stage-play-btn" aria-label={language.stage.back} onclick={back}>
                 <ArrowLeftIcon size={22} />
             </button>
-            <div class="stage-play-title">
-                <b>{char.name}</b>
-                {#if chat?.name}<span>{chat.name}</span>{/if}
+            <div class="stage-play-title" class:with-avatar={messenger && !!portrait}>
+                {#if messenger && portrait}<img class="stage-play-avatar" src={portrait} alt="" onerror={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />{/if}
+                <span class="stage-play-names">
+                    <b>{char.name}</b>
+                    {#if messenger && $doingChat}<span class="stage-play-typing">{language.stage.typing}</span>{:else if chat?.name}<span>{chat.name}</span>{/if}
+                </span>
             </div>
+            {#if !isChat}
             <div class="stage-mode" role="tablist" aria-label={language.stage.readingMode}>
                 <button role="tab" aria-selected={mode === 'novel'} class:on={mode === 'novel'} onclick={() => setMode('novel')}>{language.stage.novel}</button>
                 <button role="tab" aria-selected={mode === 'drama'} class:on={mode === 'drama'} onclick={() => setMode('drama')}>{language.stage.drama}</button>
             </div>
+            {/if}
             <button class="stage-play-btn" aria-label={language.stage.playMenu} onclick={() => (drawerOpen = true)}>
                 <MenuIcon size={22} />
             </button>
@@ -342,6 +363,89 @@
     /* The creator's notes live on the story page; Risu's note card does not repeat them here. */
     .stage-play :global(.risu-creator-quote) {
         display: none;
+    }
+    /* ---- Messenger (one-on-one chats in Novel mode) ---- */
+    .stage-play.messenger :global(.risu-stage-char) {
+        position: relative;
+        padding: 4px 14px 4px 54px;
+    }
+    .stage-play.messenger :global(.risu-stage-char::before) {
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--stage-avatar) center / cover, var(--stage-raised);
+    }
+    .stage-play.messenger :global(.risu-stage-char .chattext) {
+        width: fit-content;
+        max-width: 100%;
+        padding: 10px 14px;
+        border-radius: 6px 18px 18px 18px;
+        background: var(--stage-surface);
+    }
+    .stage-play.messenger :global(.risu-stage-char .chattext img) {
+        display: block;
+        max-width: min(100%, 320px);
+        height: auto;
+        margin: 6px 0;
+        border-radius: 14px;
+    }
+    .stage-play.messenger :global(.risu-stage-char .risu-stage-tools) {
+        justify-content: flex-start;
+        padding-left: 0;
+    }
+    /* A reply that has no words yet: dots while the AI writes, nothing otherwise. */
+    .stage-play.messenger :global(.risu-stage-char.risu-stage-empty) {
+        display: none;
+    }
+    .stage-play.messenger.generating :global(.risu-stage-char.risu-stage-empty) {
+        display: block;
+    }
+    .stage-play.messenger.generating :global(.risu-stage-char.risu-stage-empty .chattext) {
+        width: 64px;
+        height: 40px;
+        background:
+            radial-gradient(circle, var(--stage-muted) 3.5px, transparent 4px) 14px 50% / 12px 12px no-repeat,
+            radial-gradient(circle, var(--stage-muted) 3.5px, transparent 4px) 26px 50% / 12px 12px no-repeat,
+            radial-gradient(circle, var(--stage-muted) 3.5px, transparent 4px) 38px 50% / 12px 12px no-repeat,
+            var(--stage-surface);
+        animation: stage-typing 1.2s ease-in-out infinite;
+    }
+    @keyframes stage-typing {
+        50% {
+            opacity: 0.55;
+        }
+    }
+    .stage-play.messenger :global(.risu-stage-char.risu-stage-empty .risu-stage-tools) {
+        display: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .stage-play.messenger.generating :global(.risu-stage-char.risu-stage-empty .chattext) {
+            animation: none;
+        }
+    }
+    .stage-play-title.with-avatar {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+    .stage-play-avatar {
+        flex: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .stage-play-names {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    .stage-play-typing {
+        color: var(--stage-accent) !important;
     }
     .stage-mode {
         flex: none;

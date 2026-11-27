@@ -1968,6 +1968,7 @@ export const languageEnglish = {
         realmLicense: "License",
         download: "Download",
         openOnWeb: "Open on the web",
+        typing: "typing…",
         backToDrama: "Back to Drama",
         dramaLoreName: "🎭 Stage · Drama format",
         showIn: "Show in",

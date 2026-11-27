@@ -1284,6 +1284,7 @@
             <!-- Stage: no avatar or name column, so the card's own content gets the full width. -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div class="risu-stage-msg {role === 'user' ? 'risu-stage-user' : 'risu-stage-char'}"
+                 class:risu-stage-empty={!(message ?? '').trim()}
                  bind:this={stageMsgEl}
                  oncontextmenu={(e) => {
                     if ((e.target as HTMLElement)?.closest?.('a,button,input,textarea,select,label,[risu-btn],[risu-trigger]')) return

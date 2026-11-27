@@ -1820,6 +1820,7 @@ export const languageSpanish = {
         realmLicense: "Licencia",
         download: "Descargar",
         openOnWeb: "Ver en la web",
+        typing: "escribiendo…",
         backToDrama: "Volver al Drama",
         dramaLoreName: "🎭 Stage · Formato de Drama",
         showIn: "Mostrar en",
