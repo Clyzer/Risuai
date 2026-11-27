@@ -14,9 +14,29 @@
     import { language } from 'src/lang'
 
     // Over plain HTTP on a LAN address the browser hides crypto.subtle, randomUUID and OPFS,
-    // and importing fails without any message. Say so instead of failing silently.
-    const insecure = typeof window !== 'undefined' && !window.isSecureContext
-    let insecureDismissed = $state(false)
+    // and importing fails without any message. Check those APIs directly (a browser flag can
+    // enable them) and say what is missing instead of failing silently.
+    const missingApis = typeof window === 'undefined' ? [] : [
+        !window.crypto?.subtle && 'crypto.subtle',
+        typeof window.crypto?.randomUUID !== 'function' && 'crypto.randomUUID',
+        typeof navigator.storage?.getDirectory !== 'function' && 'OPFS',
+    ].filter(Boolean) as string[]
+    const dismissKey = 'risu-stage-insecure-dismissed:' + (typeof location !== 'undefined' ? location.origin : '')
+    let insecureDismissed = $state(readDismissed())
+
+    function readDismissed() {
+        try {
+            return localStorage.getItem(dismissKey) === '1'
+        } catch {
+            return false
+        }
+    }
+    function dismissInsecure() {
+        insecureDismissed = true
+        try {
+            localStorage.setItem(dismissKey, '1')
+        } catch {}
+    }
 
     // "Import from Realm" in Risu's add-character dialog asks the app to show Realm.
     $effect(() => {
@@ -37,13 +57,14 @@
         </div>
     {:else}
         <div class="stage-shell">
-            {#if insecure && !insecureDismissed}
+            {#if missingApis.length > 0 && !insecureDismissed}
                 <div class="stage-insecure" role="alert">
                     <div>
                         <b>{language.stage.insecureTitle}</b>
                         <span>{language.stage.insecureBody}</span>
+                        <small>{missingApis.join(' · ')}</small>
                     </div>
-                    <button aria-label={language.close} onclick={() => (insecureDismissed = true)}>✕</button>
+                    <button aria-label={language.close} onclick={dismissInsecure}>✕</button>
                 </div>
             {/if}
             <div class="stage-page">
@@ -122,6 +143,11 @@
     }
     .stage-insecure b {
         font-size: 14px;
+    }
+    .stage-insecure small {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px;
+        opacity: 0.8;
     }
     .stage-insecure button {
         flex: none;
