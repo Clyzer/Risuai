@@ -11,6 +11,7 @@
     import StageStoryDetail from './StageStoryDetail.svelte'
     import StageStartPicker from './StageStartPicker.svelte'
     import StageImportReview from './StageImportReview.svelte'
+    import StageSaveNotice from './StageSaveNotice.svelte'
     import { stageNav } from './stageNav.svelte'
     import { language } from 'src/lang'
 
@@ -105,6 +106,7 @@
             <StageTabBar />
         </div>
     {/if}
+    <StageSaveNotice />
 </div>
 
 <style>

@@ -1817,6 +1817,8 @@ export const languageEnglish = {
         useAsIndicator: "Pin as indicator",
         noVariables: "This playthrough has no variables yet.",
         noVariableMatch: "No variable matches your search.",
+        savingChanges: "Saving…",
+        changesSaved: "Saved",
         reading: "Reading the card…",
         reviewImport: "Review before importing",
         contents: "Contents",

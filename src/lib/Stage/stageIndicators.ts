@@ -5,7 +5,7 @@
 import type { Chat, character, groupChat } from 'src/ts/storage/database.svelte'
 import { DBState } from 'src/ts/stores.svelte'
 import { parseKeyValue } from 'src/ts/util'
-import { persistCharacterEdit } from './stageSave'
+import { persistCharacterEdit } from './stageSave.svelte'
 
 export interface StageIndicator {
     id: string

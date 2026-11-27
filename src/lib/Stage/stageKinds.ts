@@ -3,7 +3,7 @@
 // card, overridable by the player. The override lives in the character's existing `extentions`
 // field (Risu exports it with the card); prompts and chat processing never read it.
 import type { character, groupChat } from 'src/ts/storage/database.svelte'
-import { persistCharacterEdit } from './stageSave'
+import { persistCharacterEdit } from './stageSave.svelte'
 
 export type StageKind = 'story' | 'chat'
 

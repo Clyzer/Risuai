@@ -1669,6 +1669,8 @@ export const languageSpanish = {
         useAsIndicator: "Fijar como indicador",
         noVariables: "Esta partida todavía no tiene variables.",
         noVariableMatch: "Ninguna variable coincide con la búsqueda.",
+        savingChanges: "Guardando…",
+        changesSaved: "Guardado",
         reading: "Leyendo la tarjeta…",
         reviewImport: "Revisar antes de importar",
         contents: "Contenido",
