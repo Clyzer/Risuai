@@ -13,14 +13,10 @@
     import { stageNav } from './stageNav.svelte'
     import { language } from 'src/lang'
 
-    // Over plain HTTP on a LAN address the browser hides crypto.subtle, randomUUID and OPFS,
-    // and importing fails without any message. Check those APIs directly (a browser flag can
-    // enable them) and say what is missing instead of failing silently.
-    const missingApis = typeof window === 'undefined' ? [] : [
-        !window.crypto?.subtle && 'crypto.subtle',
-        typeof window.crypto?.randomUUID !== 'function' && 'crypto.randomUUID',
-        typeof navigator.storage?.getDirectory !== 'function' && 'OPFS',
-    ].filter(Boolean) as string[]
+    // Over plain HTTP on a LAN address the browser hides crypto.subtle, and importing fails
+    // without any message because every saved asset is hashed with it (hasher in parser.svelte.ts).
+    // Check that API directly (a browser flag can enable it) instead of isSecureContext.
+    const missingApis = typeof window === 'undefined' || window.crypto?.subtle ? [] : ['crypto.subtle']
     const dismissKey = 'risu-stage-insecure-dismissed:' + (typeof location !== 'undefined' ? location.origin : '')
     let insecureDismissed = $state(readDismissed())
 
