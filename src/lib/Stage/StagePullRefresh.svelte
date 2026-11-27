@@ -1,8 +1,6 @@
 <script lang="ts">
     // Pull down from the top of a Stage page to reload the app, as in the browser: an installed app
-    // does not get Chrome's own pull-to-refresh. It waits for pending saves, then reloads without
-    // Risu's "leave this page?" prompt (that prompt guards against unsaved changes, which are
-    // saved by then).
+    // does not get Chrome's own pull-to-refresh. It waits for pending saves before reloading.
     import { RefreshCwIcon } from '@lucide/svelte'
     import { onMount } from 'svelte'
     import { saving } from 'src/ts/globalApi.svelte'
@@ -69,16 +67,7 @@
         while ((saving.state || stageSaveStatus.phase === 'saving') && Date.now() < until) {
             await new Promise((r) => setTimeout(r, 150))
         }
-        silenceLeavePrompt()
         location.reload()
-    }
-
-    // Risu's beforeunload listener calls preventDefault() and sets returnValue so the browser asks
-    // "leave this page?". Everything is saved by now, so for this reload both do nothing.
-    function silenceLeavePrompt() {
-        const proto = BeforeUnloadEvent.prototype
-        Object.defineProperty(proto, 'preventDefault', { value() {}, configurable: true })
-        Object.defineProperty(proto, 'returnValue', { get: () => '', set() {}, configurable: true })
     }
 
     onMount(() => {
