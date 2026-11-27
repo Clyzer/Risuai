@@ -20,13 +20,13 @@ export const displayThemeSettingsItems: SettingItem[] = [
         classes: 'mt-4',
         options: {
             selectOptions: [
-                { value: '', label: 'Standard Risu' },
+                { value: '', labelKey: 'themeStandardRisu' },
                 { value: 'waifu', label: 'Waifulike' },
-                { value: 'mobilechat', label: 'Mobile Chat' },
+                { value: 'mobilechat', labelKey: 'themeMobileChat' },
                 { value: 'cardboard', label: 'CardBoard' },
                 { value: 'aurora', label: 'Aurora' },
                 { value: 'stage', label: 'Stage' },
-                { value: 'customHTML', label: 'Custom HTML' },
+                { value: 'customHTML', labelKey: 'themeCustomHTML' },
             ],
         },
         keywords: ['theme', 'gui', 'layout'],
@@ -102,7 +102,7 @@ export const displayThemeSettingsItems: SettingItem[] = [
             selectOptions: [
                 { value: 'standard', labelKey: 'classicRisu' },
                 { value: 'highcontrast', labelKey: 'highcontrast' },
-                { value: 'custom', label: 'Custom' },
+                { value: 'custom', labelKey: 'optCustom' },
             ],
         },
         keywords: ['text', 'color', 'theme'],
@@ -123,9 +123,9 @@ export const displayThemeSettingsItems: SettingItem[] = [
         onChange: () => updateTextThemeAndCSS(),
         options: {
             selectOptions: [
-                { value: 'default', label: 'Default' },
+                { value: 'default', labelKey: 'fontDefault' },
                 { value: 'timesnewroman', label: 'Times New Roman' },
-                { value: 'custom', label: 'Custom' },
+                { value: 'custom', labelKey: 'fontCustom' },
             ],
         },
         keywords: ['font', 'typeface'],

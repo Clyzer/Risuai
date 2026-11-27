@@ -44,19 +44,19 @@
     )
     let hasVerbosity = $derived(modelInfo.parameters.includes('verbosity'))
     const verbosityOptions = [
-        { value: 0, label: 'Low' },
-        { value: 1, label: 'Medium' },
-        { value: 2, label: 'High' },
+        { value: 0, label: language.optLow },
+        { value: 1, label: language.optMedium },
+        { value: 2, label: language.optHigh },
     ]
     let reasoningEffortOptions = $derived([
         ...(!modelInfo.parameters.includes('reasoning_effort_min_medium') ? [{
             value: -1,
-            label: modelInfo.parameters.includes('reasoning_effort_none') ? 'None' : 'Minimal',
+            label: modelInfo.parameters.includes('reasoning_effort_none') ? language.none : language.optMinimal,
         }] : []),
-        ...(!modelInfo.parameters.includes('reasoning_effort_min_medium') ? [{ value: 0, label: 'Low' }] : []),
-        { value: 1, label: 'Medium' },
-        { value: 2, label: 'High' },
-        ...(modelInfo.parameters.includes('reasoning_effort_xhigh') ? [{ value: 3, label: 'XHigh' }] : []),
+        ...(!modelInfo.parameters.includes('reasoning_effort_min_medium') ? [{ value: 0, label: language.optLow }] : []),
+        { value: 1, label: language.optMedium },
+        { value: 2, label: language.optHigh },
+        ...(modelInfo.parameters.includes('reasoning_effort_xhigh') ? [{ value: 3, label: language.optXHigh }] : []),
     ])
 
     $effect(() => {
@@ -73,15 +73,15 @@
 <span class="text-textcolor">{language.temperature} <Help key="tempature"/></span>
 <SliderInput min={0} max={200} marginBottom bind:value={value.temperature} multiple={0.01} fixed={2} disableable/>
 {/if}
-<span class="text-textcolor">Top K</span>
+<span class="text-textcolor">{language.topK}</span>
 <SliderInput min={0} max={100} marginBottom step={1} bind:value={value.top_k} disableable/>
-<span class="text-textcolor">{'Repetition Penalty'}</span>
+<span class="text-textcolor">{language.repetitionPenalty}</span>
 <SliderInput min={0} max={2} marginBottom step={0.01} fixed={2} bind:value={value.repetition_penalty} disableable/>
-<span class="text-textcolor">Min P</span>
+<span class="text-textcolor">{language.minP}</span>
 <SliderInput min={0} max={1} marginBottom step={0.01} fixed={2} bind:value={value.min_p} disableable/>
-<span class="text-textcolor">Top A</span>
+<span class="text-textcolor">{language.topA}</span>
 <SliderInput min={0} max={1} marginBottom step={0.01} fixed={2} bind:value={value.top_a} disableable/>
-<span class="text-textcolor">Top P</span>
+<span class="text-textcolor">{language.topP}</span>
 <SliderInput min={0} max={1} marginBottom step={0.01} fixed={2} bind:value={value.top_p} disableable/>
 <span class="text-textcolor">{language.frequencyPenalty}</span>
 <SliderInput min={0} max={200} marginBottom step={0.01} fixed={2} bind:value={value.frequency_penalty} disableable/>
@@ -89,11 +89,11 @@
 <SliderInput min={0} max={200} marginBottom step={0.01} fixed={2} bind:value={value.presence_penalty} disableable/>
 <ClaudeThinkingSeparateParams bind:value={value} {paramKey} />
 {#if hasReasoningEffort}
-<span class="text-textcolor">Reasoning Effort</span>
+<span class="text-textcolor">{language.reasoningEffort}</span>
 <SegmentedControl bind:value={value.reasoning_effort} options={reasoningEffortOptions} />
 {/if}
 {#if hasVerbosity}
-<span class="text-textcolor">{'Verbosity'}</span>
+<span class="text-textcolor">{language.verbosity}</span>
 <SegmentedControl bind:value={value.verbosity} options={verbosityOptions} />
 {/if}
 

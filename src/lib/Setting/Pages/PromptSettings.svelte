@@ -149,7 +149,7 @@
 {/if}
 {#if warns.length > 0 && subMenu === 0}
     <div class="text-red-500 flex flex-col items-start p-2 rounded-md border-red-500 border mt-4">
-        <h2 class="text-xl font-bold">Warning</h2>
+        <h2 class="text-xl font-bold">{language.warningTitle}</h2>
         <div class="border-b border-b-red-500 mt-1 mb-2 w-full"></div>
         {#each warns as warn}
             <span class="ml-4">{warn}</span>
@@ -160,7 +160,7 @@
 {#if subMenu === 0}
     <div class="contain w-full max-w-full mt-4 flex flex-col p-3 rounded-md">
         {#if DBState.db.promptTemplate.length === 0}
-                <div class="text-textcolor2">No Format</div>
+                <div class="text-textcolor2">{language.noFormat}</div>
         {/if}
         {#key sorted}
             {#each getReorderedTemplate() as { item: prompt, originalIndex, displayIndex }}
@@ -277,9 +277,9 @@
     <NumberInput bind:value={DBState.db.promptSettings.maxThoughtTagDepth}/>
     <span class="text-textcolor mt-4">{language.groupOtherBotRole} <Help key="groupOtherBotRole"/></span>
     <SelectInput bind:value={DBState.db.groupOtherBotRole}>
-        <OptionInput value="user">User</OptionInput>
-        <OptionInput value="system">System</OptionInput>
-        <OptionInput value="assistant">assistant</OptionInput>
+        <OptionInput value="user">{language.user}</OptionInput>
+        <OptionInput value="system">{language.system}</OptionInput>
+        <OptionInput value="assistant">{language.assistant}</OptionInput>
     </SelectInput>
     <span class="text-textcolor mt-4">{language.customPromptTemplateToggle} <Help key='customPromptTemplateToggle' /></span>
     <TextAreaInput bind:value={DBState.db.customPromptTemplateToggle}/>
@@ -295,8 +295,8 @@
     <TextAreaInput bind:value={DBState.db.systemContentReplacement}/>
     <span class="text-textcolor mt-4">{language.systemRoleReplacement} <Help key="systemRoleReplacement"/></span>
     <SelectInput bind:value={DBState.db.systemRoleReplacement}>
-        <OptionInput value="user">User</OptionInput>
-        <OptionInput value="assistant">assistant</OptionInput>
+        <OptionInput value="user">{language.user}</OptionInput>
+        <OptionInput value="assistant">{language.assistant}</OptionInput>
     </SelectInput>
     {#if DBState.db.jsonSchemaEnabled}
         <span class="text-textcolor mt-4">{language.jsonSchema} <Help key='jsonSchema' /></span>

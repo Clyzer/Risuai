@@ -22,7 +22,7 @@ export const chatFormatSettingsItems: SettingItem[] = [
                 { value: 'llama2', label: 'Llama2' },
                 { value: 'vicuna', label: 'Vicuna' },
                 { value: 'alpaca', label: 'Alpaca' },
-                { value: 'jinja', label: 'Custom (Jinja)' },
+                { value: 'jinja', labelKey: 'chatTemplateCustomJinja' },
             ],
         },
         keywords: ['chat', 'format', 'template', 'chatml', 'llama', 'jinja'],
@@ -30,7 +30,7 @@ export const chatFormatSettingsItems: SettingItem[] = [
     {
         id: 'chatFormat.jinjaTemplate',
         type: 'textarea',
-        fallbackLabel: 'Jinja Template',
+        labelKey: 'jinjaTemplate',
         bindKey: 'JinjaTemplate',
         condition: (ctx) => ctx.db.instructChatTemplate === 'jinja',
         keywords: ['jinja', 'template', 'custom'],

@@ -95,7 +95,7 @@ export function setDatabase(data:Database){
         data.forceReplaceUrl = ''
     }
     if(checkNullish(data.language)){
-        data.language = 'en'
+        data.language = 'es'
     }
     if(checkNullish(data.swipe)){
         data.swipe = true

@@ -31,15 +31,15 @@ export const advancedSettingsItems: SettingItem[] = [
     },
     {
         id: 'adv.emoPrompt', type: 'text', labelKey: 'emotionPrompt', bindKey: 'emotionPrompt2',
-        helpKey: 'emotionPrompt', options: { placeholder: 'Leave it blank to use default' }
+        helpKey: 'emotionPrompt', options: { placeholderKey: 'leaveBlankForDefault' }
     },
     {
-        id: 'adv.keiUrl', type: 'text', fallbackLabel: 'Kei Server URL', bindKey: 'keiServerURL',
-        options: { placeholder: 'Leave it blank to use default' }
+        id: 'adv.keiUrl', type: 'text', labelKey: 'keiServerUrl', bindKey: 'keiServerURL',
+        options: { placeholderKey: 'leaveBlankForDefault' }
     },
     {
         id: 'adv.presetChain', type: 'text', labelKey: 'presetChain', bindKey: 'presetChain',
-        helpKey: 'presetChain', options: { placeholder: 'Leave it blank to not use' }
+        helpKey: 'presetChain', options: { placeholderKey: 'leaveBlankToNotUse' }
     },
 
     // Request Settings
@@ -57,12 +57,12 @@ export const advancedSettingsItems: SettingItem[] = [
 
     // Vision Quality
     {
-        id: 'adv.visionQual', type: 'select', fallbackLabel: 'Vision Quality', bindKey: 'gptVisionQuality',
+        id: 'adv.visionQual', type: 'select', labelKey: 'visionQuality', bindKey: 'gptVisionQuality',
         helpKey: 'gptVisionQuality',
         options: {
             selectOptions: [
-                { value: 'low', label: 'Low' },
-                { value: 'high', label: 'High' }
+                { value: 'low', labelKey: 'qualityLow' },
+                { value: 'high', labelKey: 'qualityHigh' }
             ]
         }
     },
@@ -72,8 +72,8 @@ export const advancedSettingsItems: SettingItem[] = [
         id: 'adv.keepSessionAlive', type: 'select', labelKey: 'keepSessionAlive', bindKey: 'keepSessionAlive', helpKey: 'keepSessionAlive',
         options: {
             selectOptions: [
-                { value: 'off', label: 'Off' },
-                { value: 'sound', label: 'Via Sound' },
+                { value: 'off', labelKey: 'optOff' },
+                { value: 'sound', labelKey: 'keepSessionAliveSound' },
             ]
         }
     },
@@ -84,8 +84,8 @@ export const advancedSettingsItems: SettingItem[] = [
         id: 'adv.heightMode', type: 'select', labelKey: 'heightMode', bindKey: 'heightMode',
         options: {
             selectOptions: [
-                { value: 'normal', label: 'Normal' },
-                { value: 'percent', label: 'Percent' },
+                { value: 'normal', labelKey: 'normal' },
+                { value: 'percent', labelKey: 'optPercent' },
                 { value: 'vh', label: 'VH' },
                 { value: 'dvh', label: 'DVH' },
                 { value: 'svh', label: 'SVH' },
@@ -110,9 +110,9 @@ export const advancedSettingsItems: SettingItem[] = [
         condition: () => !isNodeServer && !isTauri,
         options: {
             segmentOptions: [
-                { value: '', label: 'Default' },
-                { value: 'eu', label: 'EU (GDPR)' },
-                { value: 'fedramp', label: 'US (FedRAMP)' }
+                { value: '', labelKey: 'optDefault' },
+                { value: 'eu', labelKey: 'requestLocationEU' },
+                { value: 'fedramp', labelKey: 'requestLocationUS' }
             ]
         }
     },
@@ -128,13 +128,13 @@ export const advancedSettingsItems: SettingItem[] = [
     {
         id: 'adv.localNetworkMode',
         type: 'check',
-        fallbackLabel: 'Local Network Mode (Experimental)',
+        labelKey: 'localNetworkMode',
         bindKey: 'localNetworkMode',
         helpKey: 'localNetworkModeDesc',
         classes: 'mt-4'
     },
     {
-        id: 'adv.localNetworkTimeout', type: 'number', fallbackLabel: 'Local Network Timeout (sec)', bindKey: 'localNetworkTimeoutSec',
+        id: 'adv.localNetworkTimeout', type: 'number', labelKey: 'localNetworkTimeout', bindKey: 'localNetworkTimeoutSec',
         condition: (ctx) => ctx.db.localNetworkMode,
         classes: 'block mb-1',
         containerClasses: 'pl-7',
@@ -162,7 +162,7 @@ export const advancedSettingsItems: SettingItem[] = [
     { id: 'adv.newOai', type: 'check', labelKey: 'newOAIHandle', bindKey: 'newOAIHandle', classes: 'mt-4' },
     { id: 'adv.noWaitTrans', type: 'check', labelKey: 'noWaitForTranslate', bindKey: 'noWaitForTranslate', classes: 'mt-4' },
     { id: 'adv.newImgBeta', type: 'check', labelKey: 'newImageHandlingBeta', bindKey: 'newImageHandlingBeta', classes: 'mt-4' },
-    { id: 'adv.allowExt', type: 'check', fallbackLabel: 'Allow all in file select', bindKey: 'allowAllExtentionFiles', classes: 'mt-4' },
+    { id: 'adv.allowExt', type: 'check', labelKey: 'allowAllInFileSelect', bindKey: 'allowAllExtentionFiles', classes: 'mt-4' },
     { id: 'adv.dynamicModelRegistry', type: 'check', labelKey: 'dynamicModelRegistry', bindKey: 'dynamicModelRegistry', classes: 'mt-4' },
     { id: 'adv.disableSeperateParameterChangeOnPresetChange', type: 'check', labelKey: 'disableSeperateParameterChangeOnPresetChange', bindKey: 'disableSeperateParameterChangeOnPresetChange', classes: 'mt-4' },
     { id: 'adv.coldstorage', type: 'check', labelKey: 'coldStorage', bindKey: 'coldstorage', classes: 'mt-4', helpKey: 'coldstorage' },
@@ -217,7 +217,7 @@ export const advancedSettingsItems: SettingItem[] = [
 
     // More Experimental (Condition: useExperimental)
     {
-        id: 'adv.exp.googleTrans', type: 'check', fallbackLabel: 'New Google Translate Experimental', bindKey: 'useExperimentalGoogleTranslator',
+        id: 'adv.exp.googleTrans', type: 'check', labelKey: 'newGoogleTranslateExperimental', bindKey: 'useExperimentalGoogleTranslator',
         condition: (ctx) => ctx.db.useExperimental, helpKey: 'unrecommended', helpUnrecommended: true, classes: 'mt-4'
     },
     {
@@ -227,7 +227,7 @@ export const advancedSettingsItems: SettingItem[] = [
 
     // Sync (Condition: db.account.useSync)
     {
-        id: 'adv.sync.realm', type: 'check', fallbackLabel: 'Lightning Realm Import', bindKey: 'lightningRealmImport',
+        id: 'adv.sync.realm', type: 'check', labelKey: 'lightningRealmImport', bindKey: 'lightningRealmImport',
         condition: (ctx) => !!ctx.db.account?.useSync, showExperimental: true, classes: 'mt-4'
     },
 

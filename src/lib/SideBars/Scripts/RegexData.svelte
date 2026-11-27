@@ -92,7 +92,7 @@ interface Props {
                 onClose()
             }
         }}>
-            <span>{value.comment.length === 0 ? 'Unnamed Script' : value.comment}</span>
+            <span>{value.comment.length === 0 ? language.unnamedScript : value.comment}</span>
         </button>
         <button class="valuer" onclick={async () => {
             const d = await alertConfirm(language.removeConfirm + value.comment)
@@ -112,7 +112,7 @@ interface Props {
             <TextInput size="sm" bind:value={value.comment} onchange={(e) => {
                 $ReloadGUIPointer += 1
             }} />
-            <span class="text-textcolor mt-4">Modification Type</span>
+            <span class="text-textcolor mt-4">{language.regexModificationType}</span>
             <SelectInput bind:value={value.type} onchange={(e) => {
                 $ReloadGUIPointer += 1
             }}>
@@ -133,7 +133,7 @@ interface Props {
                 <!-- <span class="text-textcolor mt-6">FLAG:</span>
                 <TextInput size="sm" bind:value={value.flag} /> -->
                 <Accordion styled name="FLAGS">
-                    <span class="text-textcolor mt-3">Normal Flag</span>
+                    <span class="text-textcolor mt-3">{language.regexNormalFlag}</span>
                     <div class="grid w-full grid-cols-2 rounded-md border border-darkborderc risu-flag-grid">
                         {#each flags as flag, i}
                             <button class="w-full bg-darkbg border-darkborderc text-sm py-1"
@@ -151,7 +151,7 @@ interface Props {
                         {/each}
                     </div>
 
-                    <span class="text-textcolor mt-3">Order Flag</span>
+                    <span class="text-textcolor mt-3">{language.regexOrderFlag}</span>
                     <NumberInput value={getOrder(value.flag)} onChange={(e)=>{
                         changeOrder(parseInt(e.currentTarget.value))
                     }} />
@@ -164,7 +164,7 @@ interface Props {
                         value.flag = 'g'
                     }
                 }}/>
-                <span>Custom Flag</span>
+                <span>{language.regexCustomFlag}</span>
             </div>
        </div>
     {/if}

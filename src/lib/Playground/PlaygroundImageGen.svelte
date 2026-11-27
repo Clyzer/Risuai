@@ -24,21 +24,21 @@
 
 <h2 class="text-4xl text-textcolor my-6 font-black relative">{language.imageGeneration}</h2>
 
-<span class="text-textcolor text-lg">Prompt</span>
+<span class="text-textcolor text-lg">{language.prompt}</span>
 <TextAreaInput bind:value={prompt} />
 
-<span class="text-textcolor text-lg">Neg. Prompt</span>
+<span class="text-textcolor text-lg">{language.negPromptShort}</span>
 <TextAreaInput bind:value={negPrompt} />
 
 {#if img}
-    <span class="text-textcolor text-lg">Generated</span>
-    <img src={img} class="max-w-full mt-4" alt="Generated"/>
+    <span class="text-textcolor text-lg">{language.generatedImage}</span>
+    <img src={img} class="max-w-full mt-4" alt={language.generatedImage}/>
 {/if}
 
 <Button className="mt-6" onclick={run}>
     {#if generating}
         <div class="loadmove"></div>
     {:else}
-        Generate
+        {language.generate}
     {/if}
 </Button>

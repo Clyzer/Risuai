@@ -26,7 +26,7 @@
             >
                 {#if DBState.db.customSidebarItems.length === 0}
                     <div class="text-textcolor2">
-                        No custom sidebar items configured
+                        {language.noCustomSidebarItems}
                     </div>
                 {/if}
 
@@ -45,7 +45,7 @@
                                     );
                             }}
                         >
-                            Delete
+                            {language.deleteButton}
                         </button>
                     </div>
                 {/each}
@@ -56,7 +56,7 @@
                     configPage = "add";
                 }}
             >
-                Add Item
+                {language.addItem}
             </Button>
 
             <Button
@@ -64,7 +64,7 @@
                     customSideBarConfigDialogStore.open = false;
                 }}
             >
-                Close
+                {language.close}
             </Button>
         {/if}
 
@@ -139,19 +139,19 @@
                     configPage = "list";
                 }}
             >
-                Back to List
+                {language.backToList}
             </Button>
         {/if}
 
         {#if configPage === "addSettingsSubmenu"}
             <div class="flex flex-col gap-2">
-                <TextInput bind:value={search} placeholder="Search..." />
+                <TextInput bind:value={search} placeholder={language.searchEllipsis} />
                 <Button
                     onclick={() => {
                         configPage = "add";
                     }}
                 >
-                    Back
+                    {language.back}
                 </Button>
 
                 {#each getFullSettingsData(search) as type}

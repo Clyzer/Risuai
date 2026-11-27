@@ -190,15 +190,15 @@
     <div class="absolute w-full h-full z-1100 bg-black/50 flex justify-center items-center" class:vis={ $alertStore.type === 'wait2'}>
         <div class="bg-darkbg p-4 break-any rounded-md flex flex-col max-w-3xl  max-h-full overflow-y-auto">
             {#if $alertStore.type === 'error'}
-                <h2 class="text-red-700 mt-0 mb-2 w-40 max-w-full">Error</h2>
+                <h2 class="text-red-700 mt-0 mb-2 w-40 max-w-full">{language.error}</h2>
             {:else if $alertStore.type === 'ask'}
-                <h2 class="text-green-700 mt-0 mb-2 w-40 max-w-full">Confirm</h2>
+                <h2 class="text-green-700 mt-0 mb-2 w-40 max-w-full">{language.confirm}</h2>
             {:else if $alertStore.type === 'pluginconfirm'}
-                <h2 class="text-green-700 mt-0 mb-2 w-40 max-w-full">Plugin Import</h2>
+                <h2 class="text-green-700 mt-0 mb-2 w-40 max-w-full">{language.pluginImport}</h2>
             {:else if $alertStore.type === 'selectChar'}
-                <h2 class="text-green-700 mt-0 mb-2 w-40 max-w-full">Select</h2>
+                <h2 class="text-green-700 mt-0 mb-2 w-40 max-w-full">{language.select}</h2>
             {:else if $alertStore.type === 'input'}
-                <h2 class="text-green-700 mt-0 mb-2 w-40 max-w-full">Input</h2>
+                <h2 class="text-green-700 mt-0 mb-2 w-40 max-w-full">{language.input}</h2>
             {/if}
             {#if $alertStore.type === 'markdown'}
                 <div class="overflow-y-auto">
@@ -213,23 +213,23 @@
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
 
                 <div class="text-textcolor">
-                    You should accept
+                    {language.tosAcceptPrefix}
                     <a role="button" tabindex="0" class="text-green-600 hover:text-green-500 transition-colors duration-200 cursor-pointer" onclick={() => {
                         openURL('https://account.sionyw.com/terms')
-                    }}>Terms of Service</a>
+                    }}>{language.termsOfService}</a>
 
-                    and
+                    {language.tosAnd}
 
                     <a role="button" tabindex="0" class="text-green-600 hover:text-green-500 transition-colors duration-200 cursor-pointer" onclick={() => {
                         openURL('https://account.sionyw.com/privacy')
-                    }}>Privacy Policy</a>
+                    }}>{language.privacyPolicy}</a>
 
-                    to continue
+                    {language.tosToContinue}
                 </div>
 
                 {#if localStorage.getItem('tos2') && Date.now() - new Date('2026-05-15').getTime() < 0}
                     <div class="text-gray-500 mt-4 text-sm">
-                        You can still continue using Risuai using original terms until {new Date('2026-05-15').toLocaleDateString()}.
+                        {language.tosOriginalUntil.replace('{date}', new Date('2026-05-15').toLocaleDateString())}
                     </div>
                 {/if}
             {:else if $alertStore.type === 'pluginconfirm'}
@@ -302,13 +302,13 @@
                             type: 'none',
                             msg: 'yes'
                         })
-                    }}>YES</Button>
+                    }}>{language.confirmYes}</Button>
                     <Button className="mt-4 grow" onclick={() => {
                         alertStore.set({
                             type: 'none',
                             msg: 'no'
                         })
-                    }}>NO</Button>
+                    }}>{language.confirmNo}</Button>
                 </div>
             {:else if $alertStore.type === 'tos' && (import.meta.env.VITE_RISU_LEGAL_CONFIGURED || globalThis.__RISU_LEGAL_CONFIGURED__)}
                 <div class="flex gap-2 w-full">
@@ -317,13 +317,13 @@
                             type: 'none',
                             msg: 'yes'
                         })
-                    }}>Accept</Button>
+                    }}>{language.accept}</Button>
                     <Button styled={'outlined'} className="mt-4 grow" onclick={() => {
                         alertStore.set({
                             type: 'none',
                             msg: 'no'
                         })
-                    }}>Do not Accept</Button>
+                    }}>{language.doNotAccept}</Button>
                 </div>
             {:else if $alertStore.type === 'select'}
                 {@const hasDisplay = $alertStore.msg.startsWith('__DISPLAY__')}
@@ -355,7 +355,7 @@
                         type: 'none',
                         msg: ''
                     })
-                }}>OK</Button>
+                }}>{language.ok}</Button>
             {:else if $alertStore.type === 'input'}
                 <TextInput value={$alertStore.defaultValue} id="alert-input" autocomplete="off" marginTop list="alert-input-list" />
                 <Button className="mt-4" onclick={() => {
@@ -364,7 +364,7 @@
                         //@ts-expect-error 'value' doesn't exist on Element, but target is HTMLInputElement here
                         msg: document.querySelector('#alert-input')?.value
                     })
-                }}>OK</Button>
+                }}>{language.ok}</Button>
                 {#if $alertStore.datalist}
                     <datalist id="alert-input-list">
                         {#each $alertStore.datalist as item}
@@ -377,7 +377,7 @@
                 {/if}
             {:else if $alertStore.type === 'login'}
                 <div class="fixed top-0 left-0 bg-black/50 w-full h-full flex justify-center items-center">
-                    <iframe src={hubURL + '/hub/login'} title="login" class="w-full h-full">
+                    <iframe src={hubURL + '/hub/login'} title={language.login} class="w-full h-full">
                     </iframe>
                 </div>
             {:else if $alertStore.type === 'selectChar'}
@@ -459,19 +459,19 @@
                 {/if}
                 {#if generationInfoMenuIndex === 1}
                 <div class="grid grid-cols-2 gap-y-2 gap-x-4 mt-4">
-                    <span class="text-blue-500">Index</span>
+                    <span class="text-blue-500">{language.index}</span>
                     <span class="text-blue-500 justify-self-end">{$alertGenerationInfoStore.idx}</span>
-                    <span class="text-amber-500">Model</span>
+                    <span class="text-amber-500">{language.model}</span>
                     <span class="text-amber-500 justify-self-end">{$alertGenerationInfoStore.genInfo.model}</span>
                     <span class="text-green-500">ID</span>
-                    <span class="text-green-500 justify-self-end">{DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[$alertGenerationInfoStore.idx].chatId ?? "None"}</span>
+                    <span class="text-green-500 justify-self-end">{DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[$alertGenerationInfoStore.idx].chatId ?? language.none}</span>
                     <span class="text-red-500">GenID</span>
                     <span class="text-red-500 justify-self-end">{$alertGenerationInfoStore.genInfo.generationId}</span>
-                    <span class="text-cyan-500">Saying</span>
+                    <span class="text-cyan-500">{language.genInfoSaying}</span>
                     <span class="text-cyan-500 justify-self-end">{DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[$alertGenerationInfoStore.idx].saying}</span>
-                    <span class="text-purple-500">Size</span>
+                    <span class="text-purple-500">{language.size}</span>
                     <span class="text-purple-500 justify-self-end">{JSON.stringify(DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[$alertGenerationInfoStore.idx]).length} Bytes</span>
-                    <span class="text-yellow-500">Time</span>
+                    <span class="text-yellow-500">{language.time}</span>
                     <span class="text-yellow-500 justify-self-end">{(new Date(DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[$alertGenerationInfoStore.idx].time ?? 0)).toLocaleString()}</span>
                     {#if $alertGenerationInfoStore.genInfo.stageTiming}
                         {@const stage1 = parseFloat(((($alertGenerationInfoStore.genInfo.stageTiming.stage1 ?? 0) / 1000).toFixed(1)))}
@@ -479,7 +479,7 @@
                         {@const stage3 = parseFloat(((($alertGenerationInfoStore.genInfo.stageTiming.stage3 ?? 0) / 1000).toFixed(1)))}
                         {@const stage4 = parseFloat(((($alertGenerationInfoStore.genInfo.stageTiming.stage4 ?? 0) / 1000).toFixed(1)))}
                         {@const totalRounded = (stage1 + stage2 + stage3 + stage4).toFixed(1)}
-                        <span class="text-gray-400">Timing</span>
+                        <span class="text-gray-400">{language.timing}</span>
                         <span class="text-gray-400 justify-self-end">
                             <span style="color: #60a5fa;">{stage1}</span> + 
                             <span style="color: #db2777;">{stage2}</span> + 
@@ -489,9 +489,9 @@
                         </span>
                     {/if}
 
-                    <span class="text-green-500">Tokens</span>
+                    <span class="text-green-500">{language.tokens}</span>
                     {#await tokenize(DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[$alertGenerationInfoStore.idx].data)}
-                        <span class="text-green-500 justify-self-end">Loading</span>
+                        <span class="text-green-500 justify-self-end">{language.loading}</span>
                     {:then tokens} 
                         <span class="text-green-500 justify-self-end">{tokens}</span>
                     {/await}
@@ -503,11 +503,11 @@
                             <span class="text-gray-300 text-lg mt-2">{language.errors.requestLogRemoved}</span>
                             <span class="text-gray-500">{language.errors.requestLogRemovedDesc}</span>
                         {:else}
-                            <h1 class="text-2xl font-bold my-4">URL</h1>
+                            <h1 class="text-2xl font-bold my-4">{language.url}</h1>
                             <code class="text-gray-300 border border-darkborderc p-2 rounded-md whitespace-pre-wrap">{data.url}</code>
-                            <h1 class="text-2xl font-bold my-4">Request Body</h1>
+                            <h1 class="text-2xl font-bold my-4">{language.requestBody}</h1>
                             <code class="text-gray-300 border border-darkborderc p-2 rounded-md whitespace-pre-wrap">{beautifyJSON(data.body)}</code>
-                            <h1 class="text-2xl font-bold my-4">Response</h1>
+                            <h1 class="text-2xl font-bold my-4">{language.response}</h1>
                             <code class="text-gray-300 border border-darkborderc p-2 rounded-md whitespace-pre-wrap">{beautifyJSON(data.response)}</code>
                         {/if}
                     {/await}
@@ -517,9 +517,9 @@
                         <div class="text-gray-300 text-lg mt-2">{language.promptInfoEmptyMessage}</div>
                     {:else}
                         <div class="grid grid-cols-2 gap-y-2 gap-x-4 mt-4">
-                            <span class="text-blue-500">Preset Name</span>
+                            <span class="text-blue-500">{language.presetName}</span>
                             <span class="text-blue-500 justify-self-end">{DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[$alertGenerationInfoStore.idx].promptInfo.promptName}</span>
-                            <span class="text-purple-500">Toggles</span>
+                            <span class="text-purple-500">{language.toggles}</span>
                             <div class="col-span-2 max-h-32 overflow-y-auto border border-stone-500 rounded-sm p-2 bg-gray-900">
                                 {#if DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[$alertGenerationInfoStore.idx].promptInfo.promptToggles.length === 0}
                                     <div class="text-gray-500 italic text-center py-4">{language.promptInfoEmptyToggle}</div>
@@ -532,7 +532,7 @@
                                     </div>
                                 {/if}
                             </div>
-                            <span class="text-red-500">Prompt Text</span>
+                            <span class="text-red-500">{language.promptText}</span>
                             <div class="col-span-2 max-h-80 overflow-y-auto border border-stone-500 rounded-sm p-4 bg-gray-900">
                                 {#if !DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[$alertGenerationInfoStore.idx].promptInfo.promptText}
                                     <div class="text-gray-500 italic text-center py-4">{language.promptInfoEmptyText}</div>
@@ -551,10 +551,10 @@
             {:else if $alertStore.type === 'hypaV2'}
                 <div class="flex flex-wrap gap-2 mb-4 max-w-full w-124">
                     <Button selected={generationInfoMenuIndex === 0} size="sm" onclick={() => {generationInfoMenuIndex = 0}}>
-                        Chunks
+                        {language.chunks}
                     </Button>
                     <Button selected={generationInfoMenuIndex === 1} size="sm" onclick={() => {generationInfoMenuIndex = 1}}>
-                        Summarized
+                        {language.summarized}
                     </Button>
                     <button class="ml-auto" onclick={() => {
                         alertStore.set({
@@ -575,9 +575,9 @@
                     {#each DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].hypaV2Data.mainChunks as chunk, i} <!-- Summarized should be mainChunks, afaik. Be aware of that chunks are created with mainChunks, however this editing would not change related chunks. -->
                         <div class="flex flex-col p-2 rounded-md border-darkborderc border">
                             {#if i === 0}
-                                <span class="text-green-500">Active</span>
+                                <span class="text-green-500">{language.active}</span>
                             {:else}
-                                <span>Inactive</span>
+                                <span>{language.inactive}</span>
                             {/if}
                             <TextAreaInput bind:value={chunk.text} />
                         </div>
@@ -750,7 +750,7 @@
                 {:else if $alertStore.submsg === 'preset'}
                     <span class="text-textcolor2 text-sm">{language.risupresetDesc}</span>
                     {#if cardExportType2 === 'preset' && (DBState.db.botPresets[DBState.db.botPresetsId].image || DBState.db.botPresets[DBState.db.botPresetsId].regex?.length > 0)}
-                        <span class="text-red-500 text-sm">Use RisuRealm to share the preset. Preset with image or regexes cannot be exported for now.</span>
+                        <span class="text-red-500 text-sm">{language.presetExportRealmOnly}</span>
                     {/if}
                 {:else}
                     <span class="text-textcolor2 text-sm">{language.ccv3Desc}</span>
@@ -967,11 +967,11 @@
                                         <div class="space-y-4">
                                             <div>
                                                 <div class="flex items-center justify-between mb-2">
-                                                    <span class="text-textcolor text-sm font-semibold">URL</span>
+                                                    <span class="text-textcolor text-sm font-semibold">{language.url}</span>
                                                     <button
                                                         class="p-1 rounded hover:bg-bgcolor transition-colors {copiedKey === `${i}-url` ? 'text-green-500' : 'text-textcolor2 hover:text-textcolor'}"
                                                         onclick={(e) => { e.stopPropagation(); copyToClipboard(log.url, `${i}-url`) }}
-                                                        title="Copy"
+                                                        title={language.copy}
                                                     >
                                                         {#if copiedKey === `${i}-url`}
                                                             <CheckIcon size={14} />
@@ -984,11 +984,11 @@
                                             </div>
                                             <div>
                                                 <div class="flex items-center justify-between mb-2">
-                                                    <span class="text-textcolor text-sm font-semibold">Request Body</span>
+                                                    <span class="text-textcolor text-sm font-semibold">{language.requestBody}</span>
                                                     <button
                                                         class="p-1 rounded hover:bg-bgcolor transition-colors {copiedKey === `${i}-body` ? 'text-green-500' : 'text-textcolor2 hover:text-textcolor'}"
                                                         onclick={(e) => { e.stopPropagation(); copyToClipboard(log.body, `${i}-body`) }}
-                                                        title="Copy"
+                                                        title={language.copy}
                                                     >
                                                         {#if copiedKey === `${i}-body`}
                                                             <CheckIcon size={14} />
@@ -1001,11 +1001,11 @@
                                             </div>
                                             <div>
                                                 <div class="flex items-center justify-between mb-2">
-                                                    <span class="text-textcolor text-sm font-semibold">Request Header</span>
+                                                    <span class="text-textcolor text-sm font-semibold">{language.requestHeader}</span>
                                                     <button
                                                         class="p-1 rounded hover:bg-bgcolor transition-colors {copiedKey === `${i}-header` ? 'text-green-500' : 'text-textcolor2 hover:text-textcolor'}"
                                                         onclick={(e) => { e.stopPropagation(); copyToClipboard(log.header, `${i}-header`) }}
-                                                        title="Copy"
+                                                        title={language.copy}
                                                     >
                                                         {#if copiedKey === `${i}-header`}
                                                             <CheckIcon size={14} />
@@ -1018,11 +1018,11 @@
                                             </div>
                                             <div>
                                                 <div class="flex items-center justify-between mb-2">
-                                                    <span class="text-textcolor text-sm font-semibold">Response</span>
+                                                    <span class="text-textcolor text-sm font-semibold">{language.response}</span>
                                                     <button
                                                         class="p-1 rounded hover:bg-bgcolor transition-colors {copiedKey === `${i}-response` ? 'text-green-500' : 'text-textcolor2 hover:text-textcolor'}"
                                                         onclick={(e) => { e.stopPropagation(); copyToClipboard(log.response, `${i}-response`) }}
-                                                        title="Copy"
+                                                        title={language.copy}
                                                     >
                                                         {#if copiedKey === `${i}-response`}
                                                             <CheckIcon size={14} />

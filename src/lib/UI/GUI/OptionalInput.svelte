@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { language } from "src/lang";
     import CheckInput from "./CheckInput.svelte";
     import NumberInput from "./NumberInput.svelte";
     import TextInput from "./TextInput.svelte";
@@ -41,15 +42,15 @@
     </div>
 
     {#if (value === null || value === undefined)}
-        <TextInput value={"Using default"}  className="flex-1" disabled/>
+        <TextInput value={language.usingDefault}  className="flex-1" disabled/>
     {:else if typeof(value) === 'string'}
         <TextInput bind:value={value}  className="flex-1"/>
     {:else if typeof(value) === 'number'}
         <NumberInput bind:value={value}  className="flex-1"/>
     {:else if typeof(value) === 'boolean'}
-        <button class="px-2 py-2 border border-darkborderc flex-1" class:text-textcolor2={!value} onclick={valToggle}>True</button>
-        <button class="px-2 py-2 border border-darkborderc flex-1" class:text-textcolor2={value} onclick={valToggle}>False</button>
+        <button class="px-2 py-2 border border-darkborderc flex-1" class:text-textcolor2={!value} onclick={valToggle}>{language.triggerInputLabels.boolTrue}</button>
+        <button class="px-2 py-2 border border-darkborderc flex-1" class:text-textcolor2={value} onclick={valToggle}>{language.triggerInputLabels.boolFalse}</button>
     {:else}
-        <TextInput value={"Using default"}  className="flex-1" disabled/>
+        <TextInput value={language.usingDefault}  className="flex-1" disabled/>
     {/if}
 </div>

@@ -57,25 +57,25 @@
     const relatedLinks: RelatedLink[] = [
       {
         title: "Discord",
-        description: "Join our Discord server to chat with other users and the developer.",
+        description: language.linkDiscordDesc,
         href: "https://discord.gg/Exy3NrqkGm",
         logoIcon: "paper-airplane"
       },
       {
-        title: "Website",
-        description: "See the official website for the project.",
+        title: language.linkWebsite,
+        description: language.linkWebsiteDesc,
         href: "https://risuai.net",
         logoIcon: "globe"
       },
       {
         title: "GitHub",
-        description: "View the source code and contribute to the project.",
+        description: language.linkGithubDesc,
         href: "https://github.com/kwaroran/RisuAI",
         logoIcon: "source"
       },
       {
-        title: "Email",
-        description: "Contact the developer directly.",
+        title: language.linkEmail,
+        description: language.linkEmailDesc,
         href: "mailto:support@risuai.net",
         logoIcon: "mail"
       }
@@ -84,14 +84,14 @@
 <div class="h-full w-full flex flex-col overflow-y-auto items-center risu-home">
     {#if !$OpenRealmStore}
       <Title />
-      <h3 class="text-textcolor2 mt-1 risu-home-version">Version {getVersionString()}</h3>
+      <h3 class="text-textcolor2 mt-1 risu-home-version">{language.versionLabel.replace('{version}', getVersionString())}</h3>
     {/if}
     <div class="w-full flex p-4 flex-col text-textcolor max-w-4xl">
       {#if !$OpenRealmStore}
       <div class="mt-4 mb-4 w-full border-t border-t-selected"></div>
-      <h1 class="text-2xl font-bold risu-home-section"><span class="risu-home-heading">Recently Uploaded</span><button class="text-base font-medium float-right hover:ring-3 p-1 bg-darkbg rounded-md risu-home-chip" onclick={() => {
+      <h1 class="text-2xl font-bold risu-home-section"><span class="risu-home-heading">{language.recentlyUploaded}</span><button class="text-base font-medium float-right hover:ring-3 p-1 bg-darkbg rounded-md risu-home-chip" onclick={() => {
         $OpenRealmStore = true
-      }}>Get More</button></h1>
+      }}>{language.getMore}</button></h1>
           {#if !DBState.db.hideRealm}
             {#await loadRealmList()}
               <RealmBannerSkeleton />
@@ -112,7 +112,7 @@
                   {/each}
               </div>
             {:else}
-              <div class="text-textcolor2 risu-home-note">Failed to load {language.hub}...</div>
+              <div class="text-textcolor2 risu-home-note">{language.failedToLoadHub.replace('{hub}', language.hub)}</div>
             {/if}
           {/await}
         {:else}
@@ -121,7 +121,7 @@
       {#if !DBState.db.hideRelatedLinks}
       <div class="mt-4 mb-4 w-full border-t border-t-selected"></div>
       <h1 class="text-2xl font-bold mb-4 risu-home-section">
-        <span class="risu-home-heading">Related Links</span>
+        <span class="risu-home-heading">{language.relatedLinks}</span>
       </h1>
         <div class="grid w-full grid-cols-1 gap-4 p-2 md:grid-cols-2">
           {#each relatedLinks as relatedLink}

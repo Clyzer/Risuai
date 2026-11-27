@@ -35,11 +35,11 @@
     let hasXHighEffort = $derived(modelInfo.flags.includes(LLMFlags.claudeXHighEffort))
 
     let adaptiveThinkingEffortOptions = $derived([
-        { value: 'low', label: 'Low' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'high', label: 'High' },
-        ...(hasXHighEffort ? [{ value: 'xhigh', label: 'XHigh' }] : []),
-        { value: 'max', label: 'Max' },
+        { value: 'low', label: language.optLow },
+        { value: 'medium', label: language.optMedium },
+        { value: 'high', label: language.optHigh },
+        ...(hasXHighEffort ? [{ value: 'xhigh', label: language.optXHigh }] : []),
+        { value: 'max', label: language.max },
     ])
 
     $effect(() => {
@@ -51,9 +51,9 @@
 
 <span class="text-textcolor">{language.thinkingType ?? 'Thinking Mode'}</span>
 <SelectInput bind:value={value.thinking_type}>
-    <OptionInput value="off">Off</OptionInput>
-    <OptionInput value="budget">Budget (Manual Tokens)</OptionInput>
-    <OptionInput value="adaptive">Adaptive</OptionInput>
+    <OptionInput value="off">{language.optOff}</OptionInput>
+    <OptionInput value="budget">{language.optBudget}</OptionInput>
+    <OptionInput value="adaptive">{language.optAdaptive}</OptionInput>
 </SelectInput>
 {#if value.thinking_type === 'budget'}
     <span class="text-textcolor">{language.thinkingTokens}</span>
@@ -68,16 +68,16 @@
     </SelectInput>
 {/if}
 {#if value.deepseek_thinking_type !== undefined}
-    <span class="text-textcolor">DeepSeek Thinking Mode</span>
+    <span class="text-textcolor">{language.deepseekThinkingMode}</span>
     <SelectInput bind:value={value.deepseek_thinking_type}>
-        <OptionInput value="off">Off</OptionInput>
-        <OptionInput value="enabled">Enabled</OptionInput>
+        <OptionInput value="off">{language.optOff}</OptionInput>
+        <OptionInput value="enabled">{language.optEnabled}</OptionInput>
     </SelectInput>
 {/if}
 {#if value.deepseek_thinking_type === 'enabled'}
-    <span class="text-textcolor">DeepSeek Reasoning Effort</span>
+    <span class="text-textcolor">{language.deepseekReasoningEffort}</span>
     <SelectInput bind:value={value.deepseek_reasoning_effort}>
-        <OptionInput value="high">High</OptionInput>
-        <OptionInput value="max">Max</OptionInput>
+        <OptionInput value="high">{language.optHigh}</OptionInput>
+        <OptionInput value="max">{language.max}</OptionInput>
     </SelectInput>
 {/if}

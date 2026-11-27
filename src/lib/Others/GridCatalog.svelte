@@ -60,12 +60,12 @@
                 <button 
                     class="flex items-center justify-center p-2 rounded-lg hover:bg-selected transition-colors shrink-0"
                     onclick={() => endGrid()}
-                    title="Back"
+                    title={language.back}
                 >
                     <ArrowLeft size={20} />
                 </button>
                 <div class="flex-1">
-                    <TextInput placeholder="Search" bind:value={search} size="lg" autocomplete="off" fullwidth={true}/>
+                    <TextInput placeholder={language.search} bind:value={search} size="lg" autocomplete="off" fullwidth={true}/>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2 mt-2">

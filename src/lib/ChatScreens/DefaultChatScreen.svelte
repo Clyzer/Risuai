@@ -454,18 +454,18 @@
             loadPages = Infinity
             const html2canvas = await import('html-to-image');
             const chats = document.querySelectorAll('.default-chat-screen .risu-chat')
-            alertWait("Taking screenShot...")
+            alertWait(language.takingScreenshot)
             let canvases:HTMLCanvasElement[] = []
 
             for(const chat of chats){
                 const cnv = await html2canvas.toCanvas(chat as HTMLElement)
-                alertWait("Taking screenShot... "+canvases.length+"/"+chats.length)
+                alertWait(language.takingScreenshot + " "+canvases.length+"/"+chats.length)
                 canvases.push(cnv)
             }
 
             canvases.reverse()
 
-            alertWait("Merging images...")
+            alertWait(language.mergingImages)
 
             let mergedCanvas = document.createElement('canvas');
             mergedCanvas.width = 0;
@@ -501,7 +501,7 @@
             loadPages = getInitialChatLoadPages(DBState.db)
         } catch (error) {
             console.error(error)
-            alertError("Error while taking screenshot")
+            alertError(language.screenshotError)
         }
     }
 
@@ -573,7 +573,7 @@
     {/if}
     {#if isScrollingToMessage}
         <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/50 text-white text-xl font-bold backdrop-blur-sm">
-            Loading...
+            {language.loadingEllipsis}
         </div>
     {/if}
     {#if $selectedCharID < 0}
@@ -915,12 +915,12 @@
                                     <video controls class="max-w-48 max-h-48 border border-darkborderc">
                                         <source src={inlayAsset.data} type="video/mp4" />
                                         <track kind="captions" />
-                                        Your browser does not support the video tag.
+                                        {language.browserNoVideo}
                                     </video>
                                 {:else if inlayAsset.type === 'audio'}
                                     <audio controls class="max-w-48 max-h-24 border border-darkborderc">
                                         <source src={inlayAsset.data} type="audio/mpeg" />
-                                        Your browser does not support the audio tag.
+                                        {language.browserNoAudio}
                                     </audio>
                                 {:else}
                                     <div class="max-w-24 max-h-24">{file}</div>

@@ -81,6 +81,8 @@ export interface SettingOptions {
     
     // text, textarea
     placeholder?: string;
+    /** i18n key for the placeholder — takes precedence over placeholder */
+    placeholderKey?: string;
     hideText?: boolean;     // For password-like inputs
     inputClassName?: string;
     marginBottom?: boolean;

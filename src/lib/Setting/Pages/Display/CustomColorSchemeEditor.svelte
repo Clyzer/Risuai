@@ -1,5 +1,6 @@
 <script lang="ts">
     import { DBState } from 'src/ts/stores.svelte';
+    import { language } from 'src/lang';
     import {
         changeColorSchemeType,
         exportColorScheme,
@@ -11,15 +12,15 @@
     import { DownloadIcon, HardDriveUploadIcon } from '@lucide/svelte';
 
     const colors = [
-        ['bgcolor', 'Background'],
-        ['darkbg', 'Dark Background'],
+        ['bgcolor', language.colorBackground],
+        ['darkbg', language.colorDarkBackground],
         ['borderc', 'Color 1'],
         ['selected', 'Color 2'],
         ['draculared', 'Color 3'],
         ['darkBorderc', 'Color 4'],
         ['darkbutton', 'Color 5'],
-        ['textcolor', 'Text Color'],
-        ['textcolor2', 'Text Color 2'],
+        ['textcolor', language.textColor],
+        ['textcolor2', `${language.textColor} 2`],
     ] as const;
 </script>
 
@@ -32,8 +33,8 @@
                 changeColorSchemeType((e.target as HTMLInputElement).value as 'light' | 'dark');
             }}
         >
-            <OptionInput value="light">Light</OptionInput>
-            <OptionInput value="dark">Dark</OptionInput>
+            <OptionInput value="light">{language.themeLight}</OptionInput>
+            <OptionInput value="dark">{language.themeDark}</OptionInput>
         </SelectInput>
 
         {#each colors as color}

@@ -234,7 +234,7 @@
         <div class="max-w-full bg-darkbg rounded-md flex flex-col gap-4 overflow-y-auto p-4">
             <h1 class="font-bold text-2xl w-full">
                 <span>
-                    Menu
+                    {language.menu}
                 </span>
                 <button class="float-right text-textcolor2 hover:text-green-500" onclick={() => {menuOpen = false}}>
                     <XIcon />
@@ -249,7 +249,7 @@
             <button class="w-full hover:bg-selected p-4" onclick={(async (e) => {
                 e.stopPropagation()
                 menuOpen = false
-                const input = await alertInput('Input URL or ID')
+                const input = await alertInput(language.inputUrlOrId)
                 if(input.startsWith("http")){
                     const url = new URL(input)
                     const id = url.searchParams.get("realm") ?? url.searchParams.get("code") ?? input.split("/").at(-1)
@@ -261,7 +261,7 @@
                 const id = input.split("?").at(-1)
                 downloadRisuHub(id)
 
-            })}>Import Character from URL or ID</button>
+            })}>{language.importCharFromUrlOrId}</button>
         </div>
     </div>
 {/if}

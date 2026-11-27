@@ -35,15 +35,15 @@
                 {#if file.type !== 'NOTSUPPORTED'}
                     <span class="bg-blue-500 rounded-md text-white mr-2 font-bold px-2 py-1">{file.type}</span>
                 {:else}
-                    <span class="bg-red-500 rounded-md text-white mr-2 font-bold px-2 py-1">NOTSUPPORTED</span>
+                    <span class="bg-red-500 rounded-md text-white mr-2 font-bold px-2 py-1">{language.notSupportedTag}</span>
                 {/if}
                 <span>{file.name}</span>
             </div>
-            <Button>Delete</Button>
+            <Button>{language.deleteButton}</Button>
         </div>
     {/each}
-    <Button onclick={addFile}>Add</Button>
+    <Button onclick={addFile}>{language.add}</Button>
 </div>
 <Button className="mt-6" onclick={() => {
     promptConvertion(files)
-}}>Run</Button>
+}}>{language.run}</Button>

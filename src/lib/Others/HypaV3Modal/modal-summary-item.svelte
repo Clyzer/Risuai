@@ -407,28 +407,28 @@
             <span
               class="px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap text-purple-200 bg-purple-900/70"
             >
-              Important
+              {language.summaryImportant}
             </span>
           {/if}
           {#if hypaV3Data.metrics.lastRecentSummaries.includes(summaryIndex)}
             <span
               class="px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap text-blue-200 bg-blue-900/70"
             >
-              Recent
+              {language.recent}
             </span>
           {/if}
           {#if hypaV3Data.metrics.lastSimilarSummaries.includes(summaryIndex)}
             <span
               class="px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap text-green-200 bg-green-900/70"
             >
-              Similar
+              {language.summarySimilar}
             </span>
           {/if}
           {#if hypaV3Data.metrics.lastRandomSummaries.includes(summaryIndex)}
             <span
               class="px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap text-yellow-200 bg-yellow-900/70"
             >
-              Random
+              {language.random}
             </span>
           {/if}
         </div>

@@ -28,14 +28,14 @@
         <div class="w-full flex flex-col">
             <h1 class="text-2xl font-bold max-w-full overflow-hidden whitespace-nowrap text-ellipsis">{openedData.name}</h1>
             {#if openedData.authorname}
-                <span class="text-borderc">Made by {openedData.authorname}</span>
+                <span class="text-borderc">{language.madeBy.replace('{author}', openedData.authorname)}</span>
             {/if}
             {#if openedData.original}
                 <button class="text-blue-400 text-start" onclick={() => {
                     const original = openedData.original
                     openedData = null
                     getRealmInfo(original)
-                }}>Forked</button>
+                }}>{language.forked}</button>
             {/if}
             <div class="flex justify-start gap-4 mt-4">
                 {#if DBState.db.hideAllImages}
@@ -62,17 +62,17 @@
                 <div class="border-l-selected border-l ml-1 mr-1"></div>
                 {#if openedData.hasEmotion}
                     <button class="text-textcolor2 hover:text-green-500 transition-colors" onclick={((e) => {
-                        alertNormal("This character includes emotion images")
+                        alertNormal(language.charHasEmotion)
                     })}><SmileIcon /></button>
                 {/if}
                 {#if openedData.hasAsset}
                     <button class="text-textcolor2 hover:text-green-500 transition-colors" onclick={((e) => {
-                        alertNormal("This character includes additional Assets")
+                        alertNormal(language.charHasAssets)
                     })}><ImageIcon /></button>
                 {/if}
                 {#if openedData.hasLore}
                     <button class="text-textcolor2 hover:text-green-500 transition-colors" onclick={((e) => {
-                        alertNormal("This character includes lorebook")
+                        alertNormal(language.charHasLore)
                     })}><BookIcon /></button>
                 {/if}
             </div>
@@ -105,9 +105,9 @@
             {/if}
             <button class="text-textcolor2 hover:text-red-500" onclick={(async (e) => {
                 e.stopPropagation()
-                const conf = await alertConfirm('Report this character?')
+                const conf = await alertConfirm(language.reportCharacterConfirm)
                 if(conf){
-                    const report = await alertInput('Write a report text that would be sent to the admin (for copywrite issues, use email)')
+                    const report = await alertInput(language.reportCharacterInput)
                     const da = await fetch(hubURL + '/hub/report', {
                         method: "POST",
                         body: JSON.stringify({
@@ -123,7 +123,7 @@
             {#if (DBState.db.account?.token?.split('-') ?? [])[1] === openedData.creator}
                 <button class="text-textcolor2 hover:text-red-500" onclick={(async (e) => {
                     e.stopPropagation()
-                    const conf = await alertConfirm('Do you want to remove this character from Realm?')
+                    const conf = await alertConfirm(language.removeFromRealmConfirm)
                     if(conf){
                         const da = await fetch(hubURL + '/hub/remove', {
                             method: "POST",
@@ -149,7 +149,7 @@
                 downloadRisuHub(openedData.id, { creator: openedData.creator })
                 openedData = null
             }}>
-                Chat
+                {language.Chat}
             </button>
             
         </div>

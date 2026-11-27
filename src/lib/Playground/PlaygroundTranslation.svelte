@@ -42,11 +42,11 @@
 <TextAreaInput value={output} />
 
 <CheckInput bind:check={bulk}>
-    Bulk
+    {language.bulkTranslate}
 </CheckInput>
 {#if bulk}
     <CheckInput bind:check={keepContext}>
-        Keep Context
+        {language.keepContext}
     </CheckInput>
 {/if}
 
@@ -98,7 +98,7 @@
                     continue
                 }
 
-                bulkProgressText = `(${i + 1} of ${preChunks.length})`
+                bulkProgressText = language.bulkProgress.replace('{current}', String(i + 1)).replace('{total}', String(preChunks.length))
 
                 if(prContexts.length > 10){
                     prContexts.shift()
@@ -108,7 +108,7 @@
                 const prContext = prContexts.length > 0 ? prContexts.join('\n\n') : ''
 
                 if(prContext){
-                    bulkProgressText += ` (previous ${await tokenize(prContext)} tokens)`
+                    bulkProgressText += ' ' + language.bulkPreviousTokens.replace('{count}', String(await tokenize(prContext)))
                 }
 
                 const translatedChunk = await runTranslator(preChunks[i], false, sourceLang, outputLang, {
@@ -147,13 +147,13 @@
     }
 }}>
     {#if loading}
-        Loading... {bulkProgressText}
+        {language.loadingEllipsis} {bulkProgressText}
     {:else}
-        Translate
+        {language.translateButton}
     {/if}
 </Button>
 <Button className="mt-4" onclick={() => {
     LLMCacheStorage.clear()
 }}>
-    Clear Cache
+    {language.clearCache}
 </Button>

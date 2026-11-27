@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { language } from "src/lang";
     import { fade, fly } from "svelte/transition";
     import { onMount } from "svelte";
     import IrisImage from "../../etc/Airisu.webp";
@@ -28,6 +29,9 @@
         ko: [
             { speaker: "Iris", text: "안녕하세요. 아이리스라고 합니다~.", tip: "아이리스는 보조 모델을 사용하며, Risuai의 전반적인 데이터에 접근할 수 있습니다." },
         ],
+        es: [
+            { speaker: "Iris", text: "Hola. Te estaba esperando.", tip: "Iris puede acceder a varios datos a través del sistema de Risuai. Usa el modelo auxiliar definido en la configuración." },
+        ],
         'zh-Hant': [
             { speaker: "Iris", text: "你好，我一直在等你。", tip: "Iris 可以通過 Risuai 系統訪問各種數據。它使用配置中定義的輔助模型。" },
         ],
@@ -39,6 +43,9 @@
         ],
         ko: [
             { speaker: "Iris", text: "현재 모델이 제가 응답하는걸 지원하지 않는 것 같아요. 플러그인이 아닌 GPT, Claude, Gemini 모델로 전환해주세요." },
+        ],
+        es: [
+            { speaker: "Iris", text: "Parece que tu modelo actual no me permite responder... Cambia a un modelo compatible que no sea un plugin, como GPT, Claude o Gemini." },
         ],
         'zh-Hant': [
             { speaker: "Iris", text: "看起来您当前的模型不支持我响应... 请切换到兼容的模型，如 GPT、Claude 或 Gemini，这些都不是插件。" },
@@ -232,7 +239,7 @@
         if(res.type === 'success') {
             pushDialogue({speaker: 'Iris', text: res.result});
         } else {
-            alertError("Failed to get response from LLM: " + res.result);
+            alertError(language.llmResponseFailed + res.result);
             dialogue.pop();
         }
     }
@@ -297,12 +304,12 @@
     <button
         onclick={hide}
         class="absolute right-4 top-4 flex items-center gap-1 rounded-md bg-black/40 px-2 py-1 text-xs text-white/50 transition hover:bg-black/60 hover:text-white/80"
-        aria-label="Close"
+        aria-label={language.close}
     >
         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
-        Close
+        {language.close}
     </button>
 
     <!-- Character sprite -->
@@ -334,7 +341,7 @@
                 >
                     <button
                         class="text-white/40 transition hover:text-white/80"
-                        aria-label="Reset"
+                        aria-label={language.reset}
                         onclick={() => {
                             resetDialogue();
                             showBacklog = false;
@@ -357,7 +364,7 @@
                     <button
                         onclick={() => (showBacklog = false)}
                         class="text-white/40 transition hover:text-white/80"
-                        aria-label="Close backlog"
+                        aria-label={language.closeLog}
                     >
                         <svg
                             class="h-4 w-4"
@@ -422,7 +429,7 @@
             <!-- Backlog button -->
             <button
                 onclick={openBacklog}
-                title="View backlog (L)"
+                title={language.viewLogShortcut}
                 class="absolute right-4 top-4 flex items-center gap-1 rounded-md px-2 py-1 text-xs text-white/40 transition hover:bg-white/10 hover:text-white/70"
             >
                 <svg
@@ -438,7 +445,7 @@
                         d="M4 6h16M4 10h16M4 14h10"
                     />
                 </svg>
-                Log
+                {language.log}
             </button>
 
             <!-- Speaker name tag -->
@@ -485,7 +492,7 @@
                     class="mt-1 flex items-center gap-2"
                     transition:fade={{ duration: 150 }}
                 >
-                    <span class="text-xs text-white/40">Iris is typing</span
+                    <span class="text-xs text-white/40">{language.irisTyping}</span
                     >
                     <span class="flex gap-1">
                         <span
@@ -512,8 +519,8 @@
                         onkeydown={handleInputKey}
                         type="text"
                         placeholder={waitingForReply
-                            ? "Waiting for reply…"
-                            : "Type a message…"}
+                            ? language.waitingForReply
+                            : language.typeAMessage}
                         disabled={waitingForReply}
                         class="flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-indigo-400 focus:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
                     />
@@ -522,7 +529,7 @@
                         disabled={!userInput.trim() || waitingForReply || isUnsupportedModel}
                         class="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-40"
                     >
-                        Send
+                        {language.sendButton}
                     </button>
                 </div>
             {/if}
@@ -534,7 +541,7 @@
         <button
             onclick={advance}
             class="absolute inset-0 -z-10 h-full w-full cursor-pointer bg-transparent"
-            aria-label="Advance dialogue"
+            aria-label={language.advanceDialogue}
         ></button>
     {/if}
 </div>

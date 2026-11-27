@@ -2354,7 +2354,7 @@
             >
                 {#if selectedTriggerIndices.length > 1 && selectMode === 0}
                     <div class="text-textcolor2 text-xs border-b border-darkborderc pb-2 mb-2">
-                        {selectedTriggerIndices.length} selected
+                        {language.selectedCount.replace('{count}', String(selectedTriggerIndices.length))}
                     </div>
                 {/if}
                 
@@ -2522,7 +2522,7 @@
                                         if (isMultipleSelected() && isTriggerSelected(i)) {
                                             dragElement.textContent = `${selectedTriggerIndices.length} triggers selected`
                                         } else {
-                                            dragElement.textContent = trigger?.comment || 'Unnamed Trigger'
+                                            dragElement.textContent = trigger?.comment || language.unnamedTrigger
                                         }
                                         dragElement.className = 'absolute -top-96 -left-96 px-4 py-2 bg-darkbg text-textcolor2 rounded-sm text-sm whitespace-nowrap shadow-lg pointer-events-none z-50'
                                         document.body.appendChild(dragElement)
@@ -2577,7 +2577,7 @@
                                         handleContextMenu(e, 0, i)
                                     }}
                                 >
-                                    {trigger?.comment || 'Unnamed Trigger'}
+                                    {trigger?.comment || language.unnamedTrigger}
                                 </button>
                             {/if}
                         {/each}
@@ -2642,7 +2642,7 @@
                     <Button className="mt-2" onclick={(e) => {
                         e?.stopPropagation();
                         close();
-                    }}>Close</Button>
+                    }}>{language.close}</Button>
                 </div>
 
                 <div class="md:flex-1 bg-darkbg flex-col flex h-svh min-h-svh md:h-auto md:min-h-0 risu-trigger-main">
@@ -2838,7 +2838,7 @@
                                              markEffectDrag(e, i)
                                              
                                              const dragElement = document.createElement('div')
-                                             dragElement.textContent = formatEffectDisplay(effect).replace(/<[^>]*>/g, '') || 'Effect'
+                                             dragElement.textContent = formatEffectDisplay(effect).replace(/<[^>]*>/g, '') || language.effectLabel
                                              dragElement.className = 'absolute -top-96 -left-96 px-4 py-2 bg-darkbg text-textcolor2 rounded-sm text-sm whitespace-nowrap shadow-lg pointer-events-none z-50'
                                              document.body.appendChild(dragElement)
                                              e.dataTransfer?.setDragImage(dragElement, 10, 10)
@@ -2922,7 +2922,7 @@
                                 >
                                     {language.triggerCategories[category] || category}
                                     {#if category === 'Deprecated'}
-                                        <span class="text-xs opacity-60 ml-1">(Deprecated)</span>
+                                        <span class="text-xs opacity-60 ml-1">{language.deprecatedTag}</span>
                                     {/if}
                                 </button>
                             {/each}
@@ -2963,7 +2963,7 @@
                                     <div>
                                         {language.triggerDesc[type]}
                                         {#if effectCategories.Deprecated.includes(type)}
-                                            <span class="text-xs opacity-60 ml-1">(Deprecated)</span>
+                                            <span class="text-xs opacity-60 ml-1">{language.deprecatedTag}</span>
                                         {/if}
                                     </div>
                                 </button>
@@ -3069,7 +3069,7 @@
                                 {#if i === 0}
                                     <!-- Header, skip the first trigger -->
                                 {:else}
-                                    <OptionInput value={trigger.comment}>{trigger.comment || 'Unnamed Trigger'}</OptionInput>
+                                    <OptionInput value={trigger.comment}>{trigger.comment || language.unnamedTrigger}</OptionInput>
                                 {/if}
                             {/each}
                         </SelectInput>
@@ -3709,9 +3709,9 @@
 
                         <span class="block text-textcolor">{language.condition}</span>
                         <SelectInput bind:value={editTrigger.condition}>
-                            <OptionInput value="loose">loose</OptionInput>
-                            <OptionInput value="strict">strict</OptionInput>
-                            <OptionInput value="regex">regex</OptionInput>
+                            <OptionInput value="loose">{language.triggerInputLabels.searchLoose}</OptionInput>
+                            <OptionInput value="strict">{language.triggerInputLabels.searchStrict}</OptionInput>
+                            <OptionInput value="regex">{language.triggerInputLabels.searchRegex}</OptionInput>
                         </SelectInput>
 
                         <span class="block text-textcolor">{language.depth}</span>
@@ -4137,7 +4137,7 @@
                         }
                         menuMode = 0
                         updateGuideLines()
-                    }}>Save</Button>
+                    }}>{language.save}</Button>
 
                     {#if menuMode === 3}
                         <Button className="mt-2" onclick={() => {
@@ -4148,7 +4148,7 @@
                                 selectedEffectIndexSaved = selectedEffectIndex;
                             }
                             menuMode = 0
-                        }}>Delete</Button>
+                        }}>{language.deleteButton}</Button>
                     {/if}
                 </div>
             {/if}

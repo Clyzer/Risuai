@@ -182,7 +182,7 @@
                     break
                 }
                 if(!input.startsWith('sk-')){
-                    alertError('Invalid API key')
+                    alertError(language.invalidApiKey)
                     break
                 }
                 if(provider === 'openai'){
@@ -343,7 +343,7 @@
                                 {/each}
                             </div>
                         {:else if step === 1}
-                            {@render textInput('text', DBState.db.username || 'Name')}
+                            {@render textInput('text', DBState.db.username || language.name)}
                         {:else if step === 2}
                             {@render option(language.setup.setupMessageOption1, language.setup.setupMessageOption1Desc, true, () => goTo(3))}
                             {@render option(language.setup.setupMessageOption2, '', false, () => {

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { language } from "src/lang";
     import {
         XIcon,
         StarIcon,
@@ -23,10 +24,10 @@
     });
 
     const loadOptionLabels: Record<LoadoutApplyOption, string> = {
-        modules: 'Modules',
-        globalVariables: 'Global Variables',
-        preset: 'Preset',
-        persona: 'Persona',
+        modules: language.modules,
+        globalVariables: language.globalVariables,
+        preset: language.preset,
+        persona: language.persona,
     };
 
     let saveName = $state('');
@@ -108,7 +109,7 @@
             >
                 {#if loadout.presetName}
                     <span
-                        >Preset: <span class="text-textcolor/60"
+                        >{language.preset}: <span class="text-textcolor/60"
                             >{loadout.presetName}</span 
                         ></span
                     >
@@ -121,8 +122,8 @@
                 ? 'text-yellow-400'
                 : 'text-textcolor/20 hover:text-textcolor/50'}"
             onclick={(e) => toggleFavorite(loadout, e)}
-            aria-label={loadout.favorite ? "Unfavorite" : "Favorite"}
-            title={loadout.favorite ? "Unfavorite" : "Favorite"}
+            aria-label={loadout.favorite ? language.removeFavorite : language.addFavorite}
+            title={loadout.favorite ? language.removeFavorite : language.addFavorite}
         >
             <StarIcon
                 size={15}
@@ -132,8 +133,8 @@
         <button
             class="shrink-0 pr-3 py-2.5 transition-colors hover:text-red-400/50 text-textcolor/20"
             onclick={(e) => removeLoadout(loadout)}
-            aria-label={"Remove"}
-            title={"Remove"}
+            aria-label={language.remove}
+            title={language.remove}
         >
             <TrashIcon
                 size={15}
@@ -156,19 +157,19 @@
             class="flex items-center justify-between px-5 py-3 border-b border-textcolor/10 shrink-0"
         >
             <span class="text-base font-semibold text-textcolor/90"
-                >Select Loadout</span
+                >{language.selectLoadout}</span
             >
             <button
                 class="text-textcolor/50 hover:text-textcolor/90 transition-colors"
                 onclick={close}
-                aria-label="Close"
+                aria-label={language.close}
             >
                 <XIcon size={18} />
             </button>
         </div>
 
         <div class="flex items-center gap-2 px-5 py-2.5 border-b border-textcolor/10 shrink-0 flex-wrap">
-            <span class="text-xs text-textcolor/40 uppercase tracking-wider font-medium mr-1">Load:</span>
+            <span class="text-xs text-textcolor/40 uppercase tracking-wider font-medium mr-1">{language.loadoutLoad}</span>
             {#each Object.keys(loadOptions) as key}
                 {@const k = key as LoadoutApplyOption}
                 <button
@@ -191,7 +192,7 @@
                         class="flex items-center gap-1.5 mb-2 text-textcolor/50 text-xs uppercase tracking-wider font-medium"
                     >
                         <ClockIcon size={13} />
-                        <span>Recently Used</span>
+                        <span>{language.recentlyUsed}</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         {#each getRecentLoadouts() as loadout (loadout.id)}
@@ -207,7 +208,7 @@
                         class="flex items-center gap-1.5 mb-2 text-textcolor/50 text-xs uppercase tracking-wider font-medium"
                     >
                         <UserIcon size={13} />
-                        <span>Recently Used with This Character</span>
+                        <span>{language.recentlyUsedWithCharacter}</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         {#each getCharacterLoadouts() as loadout (loadout.id)}
@@ -223,7 +224,7 @@
                         class="flex items-center gap-1.5 mb-2 text-yellow-400/70 text-xs uppercase tracking-wider font-medium"
                     >
                         <StarIcon size={13} />
-                        <span>Favorites</span>
+                        <span>{language.favorites}</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         {#each getFavoriteLoadouts() as loadout (loadout.id)}
@@ -238,11 +239,11 @@
                     class="flex items-center gap-1.5 mb-2 text-textcolor/50 text-xs uppercase tracking-wider font-medium"
                 >
                     <ListIcon size={13} />
-                    <span>All Loadouts</span>
+                    <span>{language.allLoadouts}</span>
                 </div>
                 {#if getAllLoadouts().length === 0}
                     <p class="text-textcolor/30 text-sm px-1">
-                        No loadouts saved yet.
+                        {language.noLoadoutsYet}
                     </p>
                 {:else}
                     <div class="flex flex-col gap-1">
@@ -258,7 +259,7 @@
             <input
                 type="text"
                 bind:value={saveName}
-                placeholder="Loadout name…"
+                placeholder={language.loadoutNamePlaceholder}
                 class="flex-1 min-w-0 bg-textcolor/5 hover:bg-textcolor/8 focus:bg-textcolor/10 border border-textcolor/10 focus:border-textcolor/25 rounded px-3 py-1.5 text-sm text-textcolor/80 placeholder:text-textcolor/25 outline-none transition-colors"
             />
             <button
@@ -269,7 +270,7 @@
                 }}
             >
                 <SaveIcon size={14} />
-                Save
+                {language.save}
             </button>
         </div>
     </div>

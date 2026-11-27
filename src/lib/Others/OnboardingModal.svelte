@@ -235,7 +235,7 @@
             <button
                 class="text-textcolor/50 hover:text-textcolor/90 transition-colors"
                 onclick={close}
-                aria-label="Close"
+                aria-label={language.close}
             >
                 <XIcon size={18} />
             </button>

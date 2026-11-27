@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { language } from "src/lang";
     import { alertMd } from "src/ts/alert";
     import { shareRealmCardData } from "src/ts/realm";
     import { downloadPreset } from "src/ts/storage/database.svelte";
@@ -27,7 +28,7 @@
             close()
         }
         if(e.data.type === 'success'){
-            alertMd(`## Upload Success\n\nYour character has been uploaded to Realm successfully.\n\n${"```\nhttps://realm.risuai.net/character/" +  e.data.id + "\n```"}`)
+            alertMd(`## ${language.realmUploadSuccessTitle}\n\n${language.realmUploadSuccessBody}\n\n${"```\nhttps://realm.risuai.net/character/" +  e.data.id + "\n```"}`)
             if($ShowRealmFrameStore.startsWith('preset') || $ShowRealmFrameStore.startsWith('module')){
                 //TODO, add preset edit
             }
@@ -115,7 +116,7 @@
 
 <div class="top-0 left-0 z-50 fixed w-full h-full flex flex-col justify-center items-center text-textcolor bg-white">
     <div class="bg-darkbg border-b border-b-darkborderc w-full flex p-2">
-        <h1 class="text-2xl font-bold max-w-full overflow-hidden whitespace-nowrap text-ellipsis">Upload to Realm</h1>
+        <h1 class="text-2xl font-bold max-w-full overflow-hidden whitespace-nowrap text-ellipsis">{language.uploadToRealm}</h1>
         <button class="text-textcolor text-lg hover:text-red-500 ml-auto" onclick={close}>&times;</button>
     </div>
     {#if loadingStage < 1}
@@ -125,6 +126,6 @@
     {/if}
     <iframe bind:this={iframe}
         src={getUrl()}
-        title="upload" class="w-full flex-1" class:hidden={loadingStage < 1}
+        title={language.upload} class="w-full flex-1" class:hidden={loadingStage < 1}
 ></iframe>
 </div>

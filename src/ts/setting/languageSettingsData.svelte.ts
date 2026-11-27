@@ -36,39 +36,36 @@ export const languageSettingsItems: SettingItem[] = [
             selectOptions: [
                 { value: 'de', label: 'Deutsch' },
                 { value: 'en', label: 'English' },
+                { value: 'es', label: 'Español' },
                 { value: 'ko', label: '한국어' },
                 { value: 'cn', label: '中文' },
                 { value: 'zh-Hant', label: '中文(繁體)' },
                 { value: 'vi', label: 'Tiếng Việt' },
-                { value: 'translang', label: '[Translate in your own language]' },
+                { value: 'translang', labelKey: 'translateOwnLanguage' },
             ],
         },
         onChange: async (val, ctx) => {
             if (val === 'translang') {
                 const j = await alertSelect([
-                    'Continue Translating Existing Language',
-                    'Make a new language',
+                    language.translateContinueExisting,
+                    language.translateMakeNew,
                 ]);
 
                 if (parseInt(j) === 0) {
-                    const langs = ['de', 'ko', 'cn', 'vi', 'zh-Hant'];
+                    const langs = ['de', 'es', 'ko', 'cn', 'vi', 'zh-Hant'];
                     const lang = parseInt(await alertSelect(langs));
                     changeLanguage(langs[lang]);
                     downloadFile(
                         'lang.json',
                         new TextEncoder().encode(JSON.stringify(language, null, 4)),
                     );
-                    alertNormal(
-                        'Downloaded JSON, translate it, and send it to the dev by discord DM and email. I will add it to the next version.',
-                    );
+                    alertNormal(language.translateDownloadedJson);
                 } else {
                     downloadFile(
                         'lang.json',
                         new TextEncoder().encode(JSON.stringify(languageEnglish, null, 4)),
                     );
-                    alertNormal(
-                        'Downloaded JSON, translate it, and send it to the dev by discord DM and email. I will add it to the next version.',
-                    );
+                    alertNormal(language.translateDownloadedJson);
                 }
 
                 ctx.db.language = 'en';
@@ -83,7 +80,7 @@ export const languageSettingsItems: SettingItem[] = [
     {
         id: 'lang.restartWarn',
         type: 'header',
-        fallbackLabel: 'Close the settings to take effect',
+        labelKey: 'closeSettingsToApply',
         options: { level: 'span' },
         classes: 'bg-red-500 text-sm',
         condition: () => langState.changed,
@@ -99,19 +96,19 @@ export const languageSettingsItems: SettingItem[] = [
         options: {
             selectOptions: [
                 { value: '', labelKey: 'disabled' },
-                { value: 'ko', label: 'Korean' },
-                { value: 'ru', label: 'Russian' },
-                { value: 'zh', label: 'Chinese' },
-                { value: 'zh-TW', label: 'Chinese (Traditional)', condition: (ctx) => ctx.db.translatorType === 'google' },
-                { value: 'fa', label: 'Persian (Farsi)', condition: (ctx) => ctx.db.translatorType === 'google' },
-                { value: 'ja', label: 'Japanese' },
-                { value: 'fr', label: 'French' },
-                { value: 'es', label: 'Spanish' },
-                { value: 'pt', label: 'Portuguese' },
-                { value: 'de', label: 'German' },
-                { value: 'id', label: 'Indonesian' },
-                { value: 'ms', label: 'Malaysian' },
-                { value: 'uk', label: 'Ukranian' },
+                { value: 'ko', labelKey: 'langKorean' },
+                { value: 'ru', labelKey: 'langRussian' },
+                { value: 'zh', labelKey: 'langChinese' },
+                { value: 'zh-TW', labelKey: 'langChineseTraditional', condition: (ctx) => ctx.db.translatorType === 'google' },
+                { value: 'fa', labelKey: 'langPersian', condition: (ctx) => ctx.db.translatorType === 'google' },
+                { value: 'ja', labelKey: 'langJapanese' },
+                { value: 'fr', labelKey: 'langFrench' },
+                { value: 'es', labelKey: 'langSpanish' },
+                { value: 'pt', labelKey: 'langPortuguese' },
+                { value: 'de', labelKey: 'langGerman' },
+                { value: 'id', labelKey: 'langIndonesian' },
+                { value: 'ms', labelKey: 'langMalaysian' },
+                { value: 'uk', labelKey: 'langUkrainian' },
             ],
         },
     },
@@ -127,7 +124,7 @@ export const languageSettingsItems: SettingItem[] = [
             selectOptions: [
                 { value: 'google', label: 'Google' },
                 { value: 'deepl', label: 'DeepL' },
-                { value: 'llm', label: 'Ax. Model' },
+                { value: 'llm', labelKey: 'axModelShort' },
                 { value: 'deeplX', label: 'DeepL X' },
                 { value: 'bergamot', label: 'Firefox' },
             ],
@@ -195,15 +192,15 @@ export const languageSettingsItems: SettingItem[] = [
         condition: (ctx) => !!ctx.db.translator && ctx.db.translatorType === 'google',
         options: {
             selectOptions: [
-                { value: 'auto', label: 'Auto' },
-                { value: 'en', label: 'English' },
-                { value: 'zh', label: 'Chinese' },
-                { value: 'ja', label: 'Japanese' },
-                { value: 'ko', label: 'Korean' },
-                { value: 'fr', label: 'French' },
-                { value: 'es', label: 'Spanish' },
-                { value: 'de', label: 'German' },
-                { value: 'ru', label: 'Russian' },
+                { value: 'auto', labelKey: 'optAuto' },
+                { value: 'en', labelKey: 'langEnglish' },
+                { value: 'zh', labelKey: 'langChinese' },
+                { value: 'ja', labelKey: 'langJapanese' },
+                { value: 'ko', labelKey: 'langKorean' },
+                { value: 'fr', labelKey: 'langFrench' },
+                { value: 'es', labelKey: 'langSpanish' },
+                { value: 'de', labelKey: 'langGerman' },
+                { value: 'ru', labelKey: 'langRussian' },
             ],
         },
     },
@@ -306,18 +303,18 @@ export const languageSettingsItems: SettingItem[] = [
                     const files = await selectFileByDom(['.json']);
                     if (!files || files.length === 0) return;
                     if (!files[0].name.endsWith('.json')) {
-                        alertError('Invalid file type. Please select a .json file.');
+                        alertError(language.invalidJsonFileType);
                         return;
                     }
                     const text = await files[0].text();
                     const data = JSON.parse(text);
                     if (typeof data !== 'object' || Array.isArray(data)) {
-                        alertError('Invalid JSON format');
+                        alertError(language.invalidJsonFormat);
                         return;
                     }
                     for (const [key, value] of Object.entries(data)) {
                         if (typeof key !== 'string' || typeof value !== 'string') {
-                            alertError('Invalid JSON format');
+                            alertError(language.invalidJsonFormat);
                             return;
                         }
                     }
