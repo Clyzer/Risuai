@@ -5,6 +5,7 @@
 import type { Chat, character, groupChat } from 'src/ts/storage/database.svelte'
 import { DBState } from 'src/ts/stores.svelte'
 import { parseKeyValue } from 'src/ts/util'
+import { persistCharacterEdit } from './stageSave'
 
 export interface StageIndicator {
     id: string
@@ -33,6 +34,7 @@ export function setIndicators(char: character | groupChat, list: StageIndicator[
     if (Object.keys(stage).length > 0) ext.risuStage = stage
     else delete ext.risuStage
     target.extentions = ext
+    persistCharacterEdit(char)
 }
 
 export function newIndicatorId() {

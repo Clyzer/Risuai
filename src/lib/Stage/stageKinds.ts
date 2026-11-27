@@ -3,6 +3,7 @@
 // card, overridable by the player. The override lives in the character's existing `extentions`
 // field (Risu exports it with the card); prompts and chat processing never read it.
 import type { character, groupChat } from 'src/ts/storage/database.svelte'
+import { persistCharacterEdit } from './stageSave'
 
 export type StageKind = 'story' | 'chat'
 
@@ -43,6 +44,7 @@ export function setStageKind(char: character | groupChat, kind: StageKind) {
     if (Object.keys(stage).length > 0) ext.risuStage = stage
     else delete ext.risuStage
     target.extentions = ext
+    persistCharacterEdit(char)
 }
 
 /** Short plain-text preview of a message for chat lists. */

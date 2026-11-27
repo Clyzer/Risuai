@@ -16,6 +16,7 @@ import { DBState } from 'src/ts/stores.svelte'
 import { findCharacterbyId, selectFileByDom } from 'src/ts/util'
 import type { Chat } from 'src/ts/storage/database.svelte'
 import { findUnusedChat, isStarted } from './stageData'
+import { persistCharacterEdit } from './stageSave'
 
 export function linkModule(charIndex: number, moduleId: string) {
     const char = DBState.db.characters[charIndex]
@@ -23,6 +24,7 @@ export function linkModule(charIndex: number, moduleId: string) {
     const current = char.modules ?? []
     if (!current.includes(moduleId)) {
         char.modules = [...current, moduleId]
+        persistCharacterEdit(char)
     }
 }
 
@@ -30,6 +32,7 @@ export function unlinkMissingModules(charIndex: number, missingIds: string[]) {
     const char = DBState.db.characters[charIndex]
     if (!char) return
     char.modules = (char.modules ?? []).filter((id) => !missingIds.includes(id))
+    persistCharacterEdit(char)
 }
 
 /**
