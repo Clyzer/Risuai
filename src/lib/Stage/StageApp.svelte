@@ -11,6 +11,7 @@
     import StageChats from './StageChats.svelte'
     import StageYou from './StageYou.svelte'
     import StageStoryDetail from './StageStoryDetail.svelte'
+    import StageStartPicker from './StageStartPicker.svelte'
     import { stageNav } from './stageNav.svelte'
     import { language } from 'src/lang'
 
@@ -59,6 +60,10 @@
             <MobileHeader />
             <MobileBody />
             <MobileFooter />
+        </div>
+    {:else if stageNav.startPicker !== null && DBState.db.characters[stageNav.startPicker]}
+        <div class="stage-shell">
+            <StageStartPicker index={stageNav.startPicker} />
         </div>
     {:else if stageNav.detail !== null}
         <div class="stage-shell">

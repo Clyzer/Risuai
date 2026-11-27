@@ -10,18 +10,23 @@
         LinkIcon,
         PlayIcon,
         PlusIcon,
+        SparklesIcon,
         UploadIcon,
     } from '@lucide/svelte'
     import { language } from 'src/lang'
     import { DBState } from 'src/ts/stores.svelte'
     import type { character } from 'src/ts/storage/database.svelte'
     import MultiLangDisplay from '../UI/GUI/MultiLangDisplay.svelte'
+    import { ParseMarkdown } from 'src/ts/parser/parser.svelte'
+    import { parseMultilangString } from 'src/ts/util'
+    import { ColorSchemeTypeStore } from 'src/ts/gui/colorscheme'
     import StageCover from './StageCover.svelte'
     import { stageNav } from './stageNav.svelte'
     import { listPlaythroughs, timeAgo } from './stageData'
     import { storyRequirements } from './stageRequirements'
     import { continueStory, importModuleForStory, linkModule, startNewPlaythrough, unlinkMissingModules } from './stageActions'
     import { changeChar } from 'src/ts/characters'
+    import { startMode } from './stageStarts'
 
     interface Props {
         index: number
@@ -34,7 +39,16 @@
     let playthroughs = $derived(listPlaythroughs(DBState.db.characters).filter((p) => p.charIndex === index))
     let ownImages = $derived((char?.additionalAssets?.length ?? 0) + (char?.emotionImages?.length ?? 0))
     let moduleImages = $derived((req?.linked ?? []).concat(req?.global ?? []).reduce((n, m) => n + m.assetCount, 0))
-    let hasPlayed = $derived(playthroughs.some((p) => p.messageCount > 0 || p.lastDate > 0))
+    let hasPlayed = $derived(playthroughs.length > 0)
+    let mode = $derived(char ? startMode(char) : 'single')
+    // Notes written in one language get no language tabs (MultiLangDisplay would show "Unknown Language").
+    let multiLangNotes = $derived(Object.keys(parseMultilangString(char?.creatorNotes ?? '')).some((k) => k !== 'xx'))
+    let greetingCount = $derived(1 + (char?.alternateGreetings ?? []).filter((g) => g?.trim()).length)
+
+    function newPlaythrough() {
+        if (mode === 'greetings') stageNav.startPicker = index
+        else startNewPlaythrough(index)
+    }
 
     function back() {
         stageNav.detail = null
@@ -66,10 +80,35 @@
 
             <div class="stage-detail-body">
                 <div class="stage-facts">
-                    <div><b>{char.chats.length}</b><span>{language.stage.playthroughs.toLocaleLowerCase()}</span></div>
+                    <div><b>{playthroughs.length}</b><span>{language.stage.playthroughs.toLocaleLowerCase()}</span></div>
                     <div><b>{char.globalLore?.length ?? 0}</b><span>{language.stage.loreEntries}</span></div>
                     <div><b>{(ownImages + moduleImages).toLocaleString()}</b><span>{language.stage.images}</span></div>
                 </div>
+
+                <div class="stage-section-title">{language.stage.howToStart}</div>
+                {#if mode === 'ownMenu'}
+                    <div class="stage-req start">
+                        <span class="stage-req-ic"><SparklesIcon size={18} /></span>
+                        <div class="stage-req-text">
+                            <b>{language.stage.ownStartTitle}</b>
+                            <small>{language.stage.ownStartBody}</small>
+                        </div>
+                    </div>
+                {:else if mode === 'greetings'}
+                    <button class="stage-req start action" onclick={newPlaythrough}>
+                        <span class="stage-req-ic"><SparklesIcon size={18} /></span>
+                        <div class="stage-req-text">
+                            <b>{language.stage.chooseStart}</b>
+                            <small>{language.stage.greetingsStartBody.replace('{}', String(greetingCount))}</small>
+                        </div>
+                        <ChevronRightIcon size={18} />
+                    </button>
+                {:else}
+                    <div class="stage-req start">
+                        <span class="stage-req-ic"><SparklesIcon size={18} /></span>
+                        <div class="stage-req-text"><small>{language.stage.singleStartBody}</small></div>
+                    </div>
+                {/if}
 
                 <div class="stage-section-title">{language.stage.needs}</div>
 
@@ -168,19 +207,33 @@
                 {#if char.creatorNotes}
                     <div class="stage-section-title">{language.stage.about}</div>
                     <div class="stage-notes">
-                        <MultiLangDisplay value={char.creatorNotes} markdown={true} />
+                        {#if multiLangNotes}
+                            <MultiLangDisplay value={char.creatorNotes} markdown={true} />
+                        {:else}
+                            <div class="max-w-full wrap-break-word text chat chattext prose" class:prose-invert={$ColorSchemeTypeStore}>
+                                {#await ParseMarkdown(char.creatorNotes) then md}
+                                    {@html md}
+                                {/await}
+                            </div>
+                        {/if}
                     </div>
                 {/if}
             </div>
         </div>
 
-        <div class="stage-detail-cta">
-            <button class="stage-btn2" onclick={() => startNewPlaythrough(index)}>
-                <PlusIcon size={18} />{language.stage.newPlaythrough}
-            </button>
-            <button class="stage-cta" onclick={() => (hasPlayed ? continueStory(index) : changeChar(index))}>
-                <PlayIcon size={18} fill="currentColor" />{hasPlayed ? language.stage.continue : language.stage.play}
-            </button>
+        <div class="stage-detail-cta" class:single={!hasPlayed}>
+            {#if hasPlayed}
+                <button class="stage-btn2" onclick={newPlaythrough}>
+                    <PlusIcon size={18} />{language.stage.newPlaythrough}
+                </button>
+                <button class="stage-cta" onclick={() => continueStory(index)}>
+                    <PlayIcon size={18} fill="currentColor" />{language.stage.continue}
+                </button>
+            {:else}
+                <button class="stage-cta" onclick={newPlaythrough}>
+                    <PlayIcon size={18} fill="currentColor" />{language.stage.play}
+                </button>
+            {/if}
         </div>
     </div>
 {/if}
@@ -309,6 +362,10 @@
         background: color-mix(in oklab, #ffb84d 22%, transparent);
         color: #ffcf85;
     }
+    .stage-req.start .stage-req-ic {
+        background: color-mix(in oklab, var(--stage-accent) 22%, transparent);
+        color: color-mix(in oklab, var(--stage-accent) 70%, #fff);
+    }
     .stage-req.action {
         color: var(--risu-theme-textcolor);
     }
@@ -406,6 +463,9 @@
         padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px));
         border-top: 1px solid var(--stage-line);
         background: var(--stage-bg);
+    }
+    .stage-detail-cta.single {
+        grid-template-columns: 1fr;
     }
     .stage-btn2,
     .stage-cta {

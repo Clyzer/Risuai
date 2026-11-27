@@ -8,4 +8,6 @@ export const stageNav = $state({
     homeView: 'stories' as StageHomeView,
     // Index of the character whose story page is open, or null for the tab pages.
     detail: null as number | null,
+    // Index of the character whose opening picker is open (shown over its story page).
+    startPicker: null as number | null,
 })

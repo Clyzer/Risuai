@@ -8,6 +8,7 @@ import { readModule } from 'src/ts/process/modules'
 import { DBState } from 'src/ts/stores.svelte'
 import { findCharacterbyId, selectFileByDom } from 'src/ts/util'
 import type { Chat } from 'src/ts/storage/database.svelte'
+import { findUnusedChat, isStarted } from './stageData'
 
 export function linkModule(charIndex: number, moduleId: string) {
     const char = DBState.db.characters[charIndex]
@@ -49,16 +50,27 @@ export async function importModuleForStory(charIndex: number) {
     }
 }
 
-/** Starts a new playthrough the same way Risu's "New Chat" button does, then opens it. */
-export function startNewPlaythrough(charIndex: number) {
+/**
+ * Starts a new playthrough the same way Risu's "New Chat" button does, then opens it.
+ * fmIndex picks the opening: -1 is the first message, 0..n an alternate greeting.
+ */
+export function startNewPlaythrough(charIndex: number, fmIndex: number = -1) {
     const char = DBState.db.characters[charIndex]
     if (!char) return
+    // Reuse the empty chat Risu keeps around (for example "Chat 1" right after an import).
+    const unused = findUnusedChat(char)
+    if (unused !== -1) {
+        char.chats[unused].fmIndex = fmIndex
+        char.chatPage = unused
+        changeChar(charIndex)
+        return
+    }
     const chat: Chat = {
         message: [],
         note: '',
         name: `${language.newChat} ${char.chats.length + 1}`,
         localLore: [],
-        fmIndex: -1,
+        fmIndex,
         id: v4(),
     }
     if (char.type === 'group') {
@@ -71,19 +83,26 @@ export function startNewPlaythrough(charIndex: number) {
     changeChar(charIndex)
 }
 
-/** Opens the most recently played chat of a character. */
+/**
+ * Opens the playthrough the player was last in: the open chat if it was started, otherwise the
+ * started chat with the newest lastDate, otherwise the first started one.
+ */
 export function continueStory(charIndex: number) {
     const char = DBState.db.characters[charIndex]
     if (!char) return
-    let best = char.chatPage ?? 0
-    let bestDate = -1
-    char.chats.forEach((chat, i) => {
-        const d = chat.lastDate || 0
-        if (d > bestDate) {
-            bestDate = d
-            best = i
-        }
-    })
-    if (bestDate > 0) char.chatPage = best
+    const current = char.chatPage ?? 0
+    if (!isStarted(char.chats[current])) {
+        let best = -1
+        let bestDate = -1
+        char.chats.forEach((chat, i) => {
+            if (!isStarted(chat)) return
+            const d = chat.lastDate || 0
+            if (d > bestDate) {
+                bestDate = d
+                best = i
+            }
+        })
+        if (best !== -1) char.chatPage = best
+    }
     changeChar(charIndex)
 }

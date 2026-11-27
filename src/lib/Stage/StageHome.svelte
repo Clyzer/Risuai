@@ -11,7 +11,7 @@
 
     let characters = $derived(listCharacters(DBState.db.characters))
     let playthroughs = $derived(stageNav.homeView === 'playthroughs' ? listPlaythroughs(DBState.db.characters) : [])
-    let latest = $derived(characters.find((c) => c.lastInteraction > 0))
+    let latest = $derived([...characters].filter((c) => c.lastPlayed > 0).sort((a, b) => b.lastPlayed - a.lastPlayed)[0])
     // Which stories have something to check (a module that looks missing, a link to a deleted module).
     let attention = $derived(
         new Set(
@@ -65,7 +65,7 @@
                     <span class="stage-continue-text">
                         <small>{language.stage.lastPlayed}</small>
                         <strong>{latest.name}</strong>
-                        <span>{timeAgo(latest.lastInteraction)}</span>
+                        <span>{timeAgo(latest.lastPlayed)}</span>
                     </span>
                     <span class="stage-play"><PlayIcon size={22} fill="currentColor" /></span>
                 </button>
@@ -81,9 +81,13 @@
                         </span>
                         <span class="stage-card-title">{c.name}</span>
                         <span class="stage-card-meta">
-                            <MessageSquareIcon size={13} />
-                            {c.chatCount === 1 ? language.stage.playthroughCountOne : language.stage.playthroughCount.replace('{}', String(c.chatCount))}
-                            {#if c.lastInteraction}· {timeAgo(c.lastInteraction)}{/if}
+                            {#if c.chatCount === 0}
+                                {language.stage.neverPlayed}
+                            {:else}
+                                <MessageSquareIcon size={13} />
+                                {c.chatCount === 1 ? language.stage.playthroughCountOne : language.stage.playthroughCount.replace('{}', String(c.chatCount))}
+                                {#if c.lastPlayed}· {timeAgo(c.lastPlayed)}{/if}
+                            {/if}
                         </span>
                     </button>
                 {/each}
