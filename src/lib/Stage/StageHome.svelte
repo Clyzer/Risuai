@@ -2,9 +2,9 @@
     import { AlertTriangleIcon, MessageSquareIcon, PlayIcon, PlusIcon, GitBranchIcon } from '@lucide/svelte'
     import { language } from 'src/lang'
     import { DBState } from 'src/ts/stores.svelte'
-    import { addCharacter, changeChar } from 'src/ts/characters'
+    import { changeChar } from 'src/ts/characters'
     import { storyRequirements } from './stageRequirements'
-    import { continueStory } from './stageActions'
+    import { addFromStage, continueStory } from './stageActions'
     import StageCover from './StageCover.svelte'
     import { stageNav } from './stageNav.svelte'
     import { listCharacters, listPlaythroughs, timeAgo, type StagePlaythroughEntry } from './stageData'
@@ -46,7 +46,7 @@
                 {language.stage.playthroughs}
             </button>
         </div>
-        <button class="stage-icon-btn" aria-label={language.stage.add} onclick={() => addCharacter()}>
+        <button class="stage-icon-btn" aria-label={language.stage.add} onclick={() => addFromStage()}>
             <PlusIcon size={24} />
         </button>
     </header>

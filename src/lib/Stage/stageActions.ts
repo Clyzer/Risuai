@@ -3,7 +3,10 @@
 import { v4 } from 'uuid'
 import { language } from 'src/lang'
 import { alertError, alertNormal, alertWait } from 'src/ts/alert'
-import { changeChar } from 'src/ts/characters'
+import { changeChar, createNewCharacter, createNewGroup } from 'src/ts/characters'
+import { importCharacter } from 'src/ts/characterCards'
+import { alertAddCharacter } from 'src/ts/alert'
+import { stageNav } from './stageNav.svelte'
 import { readModule } from 'src/ts/process/modules'
 import { DBState } from 'src/ts/stores.svelte'
 import { findCharacterbyId, selectFileByDom } from 'src/ts/util'
@@ -105,4 +108,34 @@ export function continueStory(charIndex: number) {
         if (best !== -1) char.chatPage = best
     }
     changeChar(charIndex)
+}
+
+/**
+ * The Stage "+" button. Same choices as Risu's add-character dialog, but an imported card is not
+ * opened as a chat: StageApp notices the new character and shows its story page instead.
+ * Characters created from scratch still open, because that is where Risu lets you edit them.
+ */
+export async function addFromStage() {
+    const before = DBState.db.characters.length
+    const choice = await alertAddCharacter()
+    switch (choice) {
+        case 'importFromRealm':
+            stageNav.detail = null
+            stageNav.tab = 'realm'
+            return
+        case 'importCharacter':
+            await importCharacter()
+            return
+        case 'createfromScratch':
+            createNewCharacter()
+            break
+        case 'createGroup':
+            createNewGroup()
+            break
+        default:
+            return
+    }
+    if (DBState.db.characters.length > before) {
+        changeChar(DBState.db.characters.length - 1)
+    }
 }

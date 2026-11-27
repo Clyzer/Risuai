@@ -37,6 +37,19 @@
         } catch {}
     }
 
+    // A newly imported card (Stage "+", drag and drop, a Realm download) opens on its story page.
+    // When Risu opens the chat itself (create from scratch, or "go to character on import" in
+    // Accessibility) the chat shows first and the story page is waiting behind it.
+    let knownCharacterCount = DBState.db.characters.length
+    $effect(() => {
+        const count = DBState.db.characters.length
+        if (count > knownCharacterCount && $selectedCharID === -1) {
+            stageNav.startPicker = null
+            stageNav.detail = count - 1
+        }
+        knownCharacterCount = count
+    })
+
     // A story page whose character was deleted closes itself.
     $effect(() => {
         if (stageNav.detail !== null && !DBState.db.characters[stageNav.detail]) {
