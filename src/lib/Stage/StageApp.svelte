@@ -10,6 +10,7 @@
     import StageHome from './StageHome.svelte'
     import StageChats from './StageChats.svelte'
     import StageYou from './StageYou.svelte'
+    import StageStoryDetail from './StageStoryDetail.svelte'
     import { stageNav } from './stageNav.svelte'
     import { language } from 'src/lang'
 
@@ -35,6 +36,13 @@
         } catch {}
     }
 
+    // A story page whose character was deleted closes itself.
+    $effect(() => {
+        if (stageNav.detail !== null && !DBState.db.characters[stageNav.detail]) {
+            stageNav.detail = null
+        }
+    })
+
     // "Import from Realm" in Risu's add-character dialog asks the app to show Realm.
     $effect(() => {
         if ($OpenRealmStore) {
@@ -51,6 +59,10 @@
             <MobileHeader />
             <MobileBody />
             <MobileFooter />
+        </div>
+    {:else if stageNav.detail !== null}
+        <div class="stage-shell">
+            <StageStoryDetail index={stageNav.detail} />
         </div>
     {:else}
         <div class="stage-shell">

@@ -1,8 +1,10 @@
 <script lang="ts">
-    import { MessageSquareIcon, PlayIcon, PlusIcon, GitBranchIcon } from '@lucide/svelte'
+    import { AlertTriangleIcon, MessageSquareIcon, PlayIcon, PlusIcon, GitBranchIcon } from '@lucide/svelte'
     import { language } from 'src/lang'
     import { DBState } from 'src/ts/stores.svelte'
     import { addCharacter, changeChar } from 'src/ts/characters'
+    import { storyRequirements } from './stageRequirements'
+    import { continueStory } from './stageActions'
     import StageCover from './StageCover.svelte'
     import { stageNav } from './stageNav.svelte'
     import { listCharacters, listPlaythroughs, timeAgo, type StagePlaythroughEntry } from './stageData'
@@ -10,6 +12,23 @@
     let characters = $derived(listCharacters(DBState.db.characters))
     let playthroughs = $derived(stageNav.homeView === 'playthroughs' ? listPlaythroughs(DBState.db.characters) : [])
     let latest = $derived(characters.find((c) => c.lastInteraction > 0))
+    // Which stories have something to check (a module that looks missing, a link to a deleted module).
+    let attention = $derived(
+        new Set(
+            characters
+                .filter((c) => storyRequirements(DBState.db.characters[c.index], DBState.db.modules ?? [], DBState.db.enabledModules ?? []).needsAttention)
+                .map((c) => c.index)
+        )
+    )
+
+    function openStory(index: number) {
+        stageNav.detail = index
+    }
+
+    function continueLatest(index: number) {
+        if (attention.has(index)) openStory(index)
+        else continueStory(index)
+    }
 
     function openPlaythrough(p: StagePlaythroughEntry) {
         DBState.db.characters[p.charIndex].chatPage = p.chatIndex
@@ -40,7 +59,7 @@
             </div>
         {:else}
             {#if latest}
-                <button class="stage-continue" onclick={() => changeChar(latest.index)}>
+                <button class="stage-continue" onclick={() => continueLatest(latest.index)}>
                     <StageCover image={latest.image} />
                     <span class="stage-continue-shade"></span>
                     <span class="stage-continue-text">
@@ -53,12 +72,17 @@
             {/if}
             <div class="stage-grid">
                 {#each characters as c (c.index)}
-                    <button class="stage-card" onclick={() => changeChar(c.index)}>
-                        <span class="stage-card-cover"><StageCover image={c.image} alt="" /></span>
+                    <button class="stage-card" onclick={() => openStory(c.index)}>
+                        <span class="stage-card-cover">
+                            <StageCover image={c.image} alt="" />
+                            {#if attention.has(c.index)}
+                                <span class="stage-card-flag" title={language.stage.attention}><AlertTriangleIcon size={16} /></span>
+                            {/if}
+                        </span>
                         <span class="stage-card-title">{c.name}</span>
                         <span class="stage-card-meta">
                             <MessageSquareIcon size={13} />
-                            {language.stage.playthroughCount.replace('{}', String(c.chatCount))}
+                            {c.chatCount === 1 ? language.stage.playthroughCountOne : language.stage.playthroughCount.replace('{}', String(c.chatCount))}
                             {#if c.lastInteraction}· {timeAgo(c.lastInteraction)}{/if}
                         </span>
                     </button>
@@ -167,7 +191,20 @@
         min-width: 0;
         text-align: left;
     }
+    .stage-card-flag {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: rgb(20 16 8 / 0.7);
+        color: #ffcf85;
+    }
     .stage-card-cover {
+        position: relative;
         display: block;
         aspect-ratio: 3 / 4;
         border-radius: 12px;
