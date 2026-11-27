@@ -31,7 +31,7 @@
     let sourceLang:string|null = $state(null)    
 
     async function runLLMMode() {
-        outputText = 'Loading...\n\n'
+        outputText = language.loadingEllipsis + '\n\n'
 
         const file = await selectSingleFile([
             'mp3', 'ogg', 'wav', 'flac',
@@ -125,7 +125,7 @@
     }
 
     async function runWhisperMode() {
-        outputText = 'Loading...\n\n'
+        outputText = language.loadingEllipsis + '\n\n'
 
         const files = await selectFileByDom([
             'mp3', 'ogg', 'wav', 'flac',
@@ -159,7 +159,7 @@
                 await video.play()
                 const d = video.duration
                 if(isNaN(d)){
-                    alertError('This video does not have a duration')
+                    alertError(language.videoNoDuration)
                     return
                 }
                 video.pause()
@@ -167,7 +167,7 @@
                 duration = d
             }
 
-            outputText = 'Converting video to audio...\n\n'
+            outputText = language.convertingVideoToAudio + '\n\n'
             const audioContext = new AudioContext()
             const audioBuffer = await audioContext.decodeAudioData(await file.arrayBuffer())
 
@@ -188,7 +188,7 @@
             for(let pointer = 0; pointer < leftInt16.length; pointer += 1152){
                 enc.append(mp3encoder.encodeBuffer(leftInt16.subarray(pointer, pointer + 1152), rightInt16.subarray(pointer, pointer + 1152)))
                 if(pointer % 115200 === 0){
-                    outputText = `Converting  video to audio... ${(pointer / leftInt16.length * 100).toFixed(2)}%\n`
+                    outputText = `${language.convertingVideoToAudio} ${(pointer / leftInt16.length * 100).toFixed(2)}%\n`
                     await sleep(1)
                 }
             }
@@ -198,7 +198,7 @@
                 type: 'audio/mp3'
             })
 
-            outputText = 'Transcribing audio...\n\n'
+            outputText = language.transcribingAudio + '\n\n'
             requestFile = file2
         }
         else{
@@ -251,9 +251,9 @@
                     }
                 }
                 
-                outputText = ('Transcribing... (This may take a while. Do not close the tab.)')
+                outputText = language.transcribingLong
                 if(device !== 'webgpu'){
-                    outputText += `\nYour browser or OS do not support WebGPU, so the transcription may be slower.`
+                    outputText += `\n${language.transcribeNoWebGPU}`
                 }
                 await sleep(10)
                 const res1 = await transcriber(combined, {
@@ -432,7 +432,7 @@
 {#if mode === 'whisperLocal'}
     <span class="text-textcolor text-lg mt-4">{language.sourceLanguage}</span>
     <SelectInput value={sourceLang === null ? 'auto' : sourceLang}>
-        <OptionInput value="auto">Auto</OptionInput>
+        <OptionInput value="auto">{language.optAuto}</OptionInput>
         {#each getLanguageCodes() as lang}
             <OptionInput value={lang.code}>{lang.name}</OptionInput>
         {/each}
@@ -457,7 +457,7 @@
 }}>
     <OptionInput value="llm">LLM</OptionInput>
     <OptionInput value="whisper">Whisper</OptionInput>
-    <OptionInput value="whisperLocal">Whisper Local</OptionInput>
+    <OptionInput value="whisperLocal">{language.whisperLocal}</OptionInput>
 </SelectInput>
 
 {#if !(modelInfo.flags.includes(LLMFlags.hasAudioInput) && modelInfo.flags.includes(LLMFlags.hasVideoInput)) && mode === 'llm'}

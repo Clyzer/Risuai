@@ -1,7 +1,8 @@
 <script lang="ts">
+    import { backLayer } from '../Stage/stageBack'
 
     import Suggestion from './Suggestion.svelte';
-    import { CameraIcon, DatabaseIcon, DicesIcon, GlobeIcon, ImagePlusIcon, LanguagesIcon, Laugh, MenuIcon, MicOffIcon, PackageIcon, Plus, RefreshCcwIcon, ReplyIcon, Send, StepForwardIcon, XIcon, BrainIcon, ArrowDown, SparkleIcon, CompassIcon, ChevronRightIcon } from "@lucide/svelte";
+    import { CameraIcon, DatabaseIcon, DicesIcon, GlobeIcon, ImagePlusIcon, LanguagesIcon, Laugh, MenuIcon, MicOffIcon, PackageIcon, Plus, RefreshCcwIcon, ReplyIcon, Send, StepForwardIcon, XIcon, BrainIcon, ArrowDown, SparkleIcon, CompassIcon, ChevronRightIcon, EllipsisIcon } from "@lucide/svelte";
     import { selectedCharID, PlaygroundStore, createSimpleCharacter, hypaV3ModalOpen, ScrollToMessageStore, additionalChatMenu, additionalFloatingActionButtons, easyPanelStore, chatPanelStore, onboardingModalStore } from "../../ts/stores.svelte";
     import { tick } from 'svelte';
     import Chat from "./Chat.svelte";
@@ -404,7 +405,7 @@
     });
 
     async function updateInputTransateMessage(reverse: boolean) {
-        if(!DBState.db.useAutoTranslateInput){
+        if(!DBState.db.useAutoTranslateInput || !DBState.db.translator){
             return
         }
         if(isExpTranslator()){
@@ -454,18 +455,18 @@
             loadPages = Infinity
             const html2canvas = await import('html-to-image');
             const chats = document.querySelectorAll('.default-chat-screen .risu-chat')
-            alertWait("Taking screenShot...")
+            alertWait(language.takingScreenshot)
             let canvases:HTMLCanvasElement[] = []
 
             for(const chat of chats){
                 const cnv = await html2canvas.toCanvas(chat as HTMLElement)
-                alertWait("Taking screenShot... "+canvases.length+"/"+chats.length)
+                alertWait(language.takingScreenshot + " "+canvases.length+"/"+chats.length)
                 canvases.push(cnv)
             }
 
             canvases.reverse()
 
-            alertWait("Merging images...")
+            alertWait(language.mergingImages)
 
             let mergedCanvas = document.createElement('canvas');
             mergedCanvas.width = 0;
@@ -501,13 +502,18 @@
             loadPages = getInitialChatLoadPages(DBState.db)
         } catch (error) {
             console.error(error)
-            alertError("Error while taking screenshot")
+            alertError(language.screenshotError)
         }
     }
 
     // Aurora opens the menu right above the composer; this measures how much
     // of the chat's scroll box is left above it so the menu can scroll instead
     // of being cut off. Other themes do not read the variable.
+    // Stage theme: the back gesture closes the chat actions menu first.
+    $effect(() => {
+        if (openMenu && DBState.db.theme === 'stage') return backLayer(() => (openMenu = false))
+    })
+
     function fitChatMenu(menu: HTMLElement) {
         const scroller = menu.closest('.default-chat-screen')
         const bar = menu.parentElement
@@ -573,7 +579,7 @@
     {/if}
     {#if isScrollingToMessage}
         <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/50 text-white text-xl font-bold backdrop-blur-sm">
-            Loading...
+            {language.loadingEllipsis}
         </div>
     {/if}
     {#if $selectedCharID < 0}
@@ -675,7 +681,7 @@
 
                 {#if $doingChat || doingChatInputTranslate}
                     <button
-                            aria-labelledby="cancel"
+                            aria-label={language.stage.stopReply}
                             class="peer-focus:border-textcolor  flex justify-center border-y border-darkborderc items-center text-textcolor p-3 hover:bg-blue-500 hover:text-white transition-colors" onclick={abortChat}
                             style:height={inputHeight}
                     >
@@ -684,6 +690,7 @@
                 {:else}
                     <button
                             onclick={send}
+                            aria-label={language.stage.sendMessage}
                             class="flex justify-center border-y border-darkborderc items-center text-textcolor p-3 peer-focus:border-textcolor hover:bg-blue-500 hover:text-white transition-colors button-icon-send"
                             style:height={inputHeight}
                     >
@@ -696,10 +703,12 @@
                             openMenu = !openMenu
                             e.stopPropagation()
                         }}
-                            class="peer-focus:border-textcolor mr-2 flex border-y border-r border-darkborderc justify-center items-center text-textcolor p-3 rounded-r-md hover:bg-blue-500 hover:text-white transition-colors"
+                            class="risu-chat-options-btn peer-focus:border-textcolor mr-2 flex border-y border-r border-darkborderc justify-center items-center text-textcolor p-3 rounded-r-md hover:bg-blue-500 hover:text-white transition-colors"
                             style:height={inputHeight}
+                            aria-label={language.chatOptions}
                     >
-                        <MenuIcon />
+                        <!-- Stage keeps ☰ for its play menu; the chat actions get their own icon there. -->
+                        {#if DBState.db.theme === 'stage'}<EllipsisIcon />{:else}<MenuIcon />{/if}
                     </button>
                 {:else}
                     <div onclick={(e) => {
@@ -805,7 +814,7 @@
                             {/if}
                         {/if}
                         
-                        {#if DBState.db.translator !== ''}
+                        {#if DBState.db.translator !== '' || DBState.db.useAutoTranslateInput}
                             <div class={"flex items-center cursor-pointer "+ (DBState.db.useAutoTranslateInput ? 'text-green-500':'lg:hover:text-green-500')} onclick={() => {
                                 DBState.db.useAutoTranslateInput = !DBState.db.useAutoTranslateInput
                             }}>
@@ -877,7 +886,7 @@
                     </div>
                 {/if}
             </div>
-            {#if DBState.db.useAutoTranslateInput && DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
+            {#if DBState.db.useAutoTranslateInput && DBState.db.translator && DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
                 <div class="flex items-center mt-2 mb-2">
                     <label for='messageInputTranslate' class="text-textcolor ml-4">
                         <LanguagesIcon />
@@ -915,12 +924,12 @@
                                     <video controls class="max-w-48 max-h-48 border border-darkborderc">
                                         <source src={inlayAsset.data} type="video/mp4" />
                                         <track kind="captions" />
-                                        Your browser does not support the video tag.
+                                        {language.browserNoVideo}
                                     </video>
                                 {:else if inlayAsset.type === 'audio'}
                                     <audio controls class="max-w-48 max-h-24 border border-darkborderc">
                                         <source src={inlayAsset.data} type="audio/mpeg" />
-                                        Your browser does not support the audio tag.
+                                        {language.browserNoAudio}
                                     </audio>
                                 {:else}
                                     <div class="max-w-24 max-h-24">{file}</div>

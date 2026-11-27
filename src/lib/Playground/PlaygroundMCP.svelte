@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { language } from "src/lang";
   import TextAreaInput from "../UI/GUI/TextAreaInput.svelte";
     import Button from "../UI/GUI/Button.svelte";
     import { type MCPToolWithURL, callMCPTool, getMCPMeta, getMCPTools, initializeMCPs } from "src/ts/process/mcp/mcp";
@@ -18,10 +19,10 @@
 
 <h2 class="text-4xl text-textcolor my-6 font-black relative">MCP</h2>
 
-<span class="text-textcolor text-lg">Metadatas</span>
+<span class="text-textcolor text-lg">{language.mcpMetadata}</span>
 <TextAreaInput value={metadatas} />
 
-<span class="text-textcolor text-lg">Tools</span>
+<span class="text-textcolor text-lg">{language.tools}</span>
 <div class="flex flex-col gap-2">
   {#each tools as tool}
     <div class="border border-gray-300 p-2 rounded-md">
@@ -30,14 +31,14 @@
       <div class="prose prose-gray w-full">
         <pre class="overflow-x-auto w-full">{JSON.stringify(tool.inputSchema, null, 2)}</pre>
       </div>
-      <TextAreaInput bind:value={toolInputs[tool.name]} placeholder="Input for this tool" />
+      <TextAreaInput bind:value={toolInputs[tool.name]} placeholder={language.mcpToolInput} />
       <Button onclick={async () => {
         const x = await callMCPTool(tool.name, JSON.parse(toolInputs[tool.name]));
-        alertMd(`Tool ${tool.name} executed\n\nResponse:\n\`\`\`json\n${JSON.stringify(x, null, 2)}\n\`\`\``);
-      }}>Execute {tool.name}</Button>
+        alertMd(`${language.mcpToolExecuted.replace('{name}', tool.name)}\n\n${language.response}:\n\`\`\`json\n${JSON.stringify(x, null, 2)}\n\`\`\``);
+      }}>{language.mcpExecuteTool.replace('{name}', tool.name)}</Button>
     </div>
   {/each}
 </div>
 
 
-<Button onclick={refresh}>Refresh</Button>
+<Button onclick={refresh}>{language.refresh}</Button>

@@ -219,10 +219,10 @@
             </div>
           </div>
           <div class="text-textcolor2 text-sm mb-3">
-            <span>{asset.created != null ? new Date(asset.created).toLocaleString() : '(unknown date)'}</span>
+            <span>{asset.created != null ? new Date(asset.created).toLocaleString() : language.unknownDate}</span>
           </div>
 
-          <Button onclick={() => deleteAsset(id, asset.name)} styled="danger" size="sm">Delete</Button>
+          <Button onclick={() => deleteAsset(id, asset.name)} styled="danger" size="sm">{language.deleteButton}</Button>
         </div>
       {/key}
     {/each}
@@ -230,7 +230,7 @@
 
   {#if hasMore}
     <div bind:this={loadMoreSentinel} class="h-12 flex items-center justify-center text-textcolor2 text-sm">
-      Loading...
+      {language.loadingEllipsis}
     </div>
   {/if}
 {/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { XIcon } from "@lucide/svelte"
+    import { language } from "src/lang"
     import { getDatabase, type PromptDiffPrefs } from "../../ts/storage/database.svelte"
     import type { PromptItem, PromptItemPlain, PromptItemChatML, PromptItemTyped, PromptItemAuthorNote, PromptItemChat } from "src/ts/process/prompt.ts";
 
@@ -218,18 +219,18 @@
 // UI option lists
 // -----------------------------------------------------------------------------
      const diffOptions = [
-        { value: 'line', label: 'Line' },
-        { value: 'intraline', label: 'Intraline' },
+        { value: 'line', label: language.diffLine },
+        { value: 'intraline', label: language.diffIntraline },
     ] as const
 
     const formatOptions = [
-        { value: 'raw', label: 'Raw' },
-        { value: 'card', label: 'Card' },
+        { value: 'raw', label: language.diffRaw },
+        { value: 'card', label: language.diffCard },
     ] as const
 
     const viewOptions = [
-        { value: 'unified', label: 'Unified' },
-        { value: 'split', label: 'Split' },
+        { value: 'unified', label: language.diffUnified },
+        { value: 'split', label: language.diffSplit },
     ] as const
 
 // Inputs
@@ -328,7 +329,7 @@
 
     function tagText(part: ModifyPart): string | null {
         if ((part.src === 'linebyline') && (part.right.lineRole === 'name' || part.right.lineRole === 'header')) {
-            return part.right.lineRole === 'name' ? 'NAME' : 'TYPE'
+            return part.right.lineRole === 'name' ? language.diffTagName : language.diffTagType
         }
         return null
     }
@@ -1330,7 +1331,7 @@
     {:else}
       {lineTextOf(part)}{#if isLineby(part) && (part.line.lineRole === 'name' || part.line.lineRole === 'header')}
         <span class={nameHeaderTagClass}>
-          {part.line.lineRole === 'name' ? 'NAME' : 'TYPE'}
+          {part.line.lineRole === 'name' ? language.diffTagName : language.diffTagType}
         </span>
       {/if}
     {/if}
@@ -1363,7 +1364,7 @@
       class:mb-5={isLineby(part) && part.right.lineRole === 'header'}
     >
       {#if part.src === 'linebyline' && part.right.text === ''}
-        <span class="text-textcolor2/60 italic">[empty line]</span>
+        <span class="text-textcolor2/60 italic">{language.diffEmptyLine}</span>
       {:else}
         {@render renderTokens(part.tokens, 'remove', tokenPackLineAdd)}{#if tag}<span class={nameHeaderTagClass}>{tag}</span>{/if}
       {/if}
@@ -1396,7 +1397,7 @@
     <div class={`whitespace-pre-wrap ${lineAddClass}`}>
     {#each parts as part, i (i)}
       {#if part.src === 'linebyline' && part.right.text === ''}
-        <span class="text-textcolor2/60 italic">[empty line]</span>
+        <span class="text-textcolor2/60 italic">{language.diffEmptyLine}</span>
       {:else}
         {@render renderTokens(part.tokens, 'remove', tokenPackLineAdd)}{#if tagText(part)}<span class={nameHeaderTagClass}>{tagText(part)}</span>{/if}
       {/if}
@@ -1469,7 +1470,7 @@
         </div>
       {/if}
     {:else}
-      <div class="text-xs text-textcolor2 italic">No {type}</div>
+      <div class="text-xs text-textcolor2 italic">{type === 'name' ? language.diffNoName : language.diffNoType}</div>
     {/if}
   </div>
 {/snippet}
@@ -1483,21 +1484,21 @@
         ${d.omitted > 0 ? 'hover:border-white/40 hover:text-textcolor hover:shadow-lg cursor-pointer' : 'text-textcolor2/50 cursor-default'}`}
       disabled={d.omitted === 0}
       onclick={() => expandRange(scope, d.from, d.to)}
-      title={d.omitted > 0 ? 'Click to expand hidden lines' : ''}
+      title={d.omitted > 0 ? language.diffExpandHidden : ''}
     >
       {#if d.pos === 'start'}
         {#if d.omitted > 0}
-          … {d.omitted} lines above not shown (click to expand) …
+          {language.diffLinesAbove.replace('{count}', String(d.omitted))}
         {:else}
           BOF
         {/if}
 
       {:else if d.pos === 'between'}
-        … {d.omitted} lines skipped (click to expand) …
+        {language.diffLinesSkipped.replace('{count}', String(d.omitted))}
 
       {:else} <!-- end -->
         {#if d.omitted > 0}
-          … {d.omitted} lines below not shown (click to expand) …
+          {language.diffLinesBelow.replace('{count}', String(d.omitted))}
         {:else}
           EOF
         {/if}
@@ -1538,7 +1539,7 @@
         class:mb-5={role === 'header'}
       >
         {#if isLineby(part) && sideText === ''}
-          <span class="text-textcolor2/60 italic">[empty line]</span>
+          <span class="text-textcolor2/60 italic">{language.diffEmptyLine}</span>
         {:else}
           {@render renderTokens(part.tokens, isLeft ? 'add' : 'remove', diffStyle === 'line' ? (isLeft ? tokenPackLineRemove : tokenPackLineAdd) : tokenPackIntraline)}
         {/if}
@@ -1556,10 +1557,10 @@
   {@const cardChangeCount = (c.modifiedCount ?? 0) + (c.addedCount ?? 0) + (c.removedCount ?? 0)}
 
   {@const statusLabel =
-    cardPart.k === 'modify' ? 'Modified'
-    : cardPart.k === 'add'  ? 'Added'
-    : cardPart.k === 'remove' ? 'Removed'
-    : 'Unchanged'}
+    cardPart.k === 'modify' ? language.diffModified
+    : cardPart.k === 'add'  ? language.diffAdded
+    : cardPart.k === 'remove' ? language.diffRemoved
+    : language.diffUnchanged}
 
   {@const statusClass =
     cardPart.k === 'modify' ? 'bg-blue-500/15 text-blue-300 border-blue-500/40'
@@ -1572,7 +1573,7 @@
       {statusLabel}
     </span>
     <span class="text-[11px] text-textcolor2">
-      {cardChangeCount} change{cardChangeCount === 1 ? '' : 's'}
+      {(cardChangeCount === 1 ? language.diffChangeOne : language.diffChangeMany).replace('{count}', String(cardChangeCount))}
     </span>
     <span class="text-[11px] text-textcolor2">
       ~{c.modifiedCount ?? 0} / +{c.addedCount ?? 0} / -{c.removedCount ?? 0}
@@ -1586,14 +1587,14 @@
     
     <div class="flex items-center justify-between px-4 py-3 border-b border-darkborderc">
       <div class="flex items-center gap-4 flex-wrap">
-        {@render pillRadioGroup('Diff', 'diffStyle', diffOptions, diffStyle, (v) => (diffStyle = v as DiffStyle))}
-        {@render pillRadioGroup('Format', 'formatStyle', formatOptions, formatStyle, (v) => (formatStyle = v as FormatStyle), isFlatText)}
-        {@render pillRadioGroup('View', 'viewStyle', viewOptions, viewStyle, (v) => (viewStyle = v as ViewStyle), isFlatText)}        
-        {@render checkboxToggle('Legacy', isFlatText, (v) => (isFlatText = v))}
-        {@render checkboxToggle( 'Grouped', isGrouped, (v) => (isGrouped = v), isFlatText || diffStyle !== 'line' || viewStyle === 'split', true)}
-        {@render checkboxToggle('Only changes', showOnlyChanges, (v) => (showOnlyChanges = v), isFlatText, true)}
+        {@render pillRadioGroup(language.diffLabel, 'diffStyle', diffOptions, diffStyle, (v) => (diffStyle = v as DiffStyle))}
+        {@render pillRadioGroup(language.format, 'formatStyle', formatOptions, formatStyle, (v) => (formatStyle = v as FormatStyle), isFlatText)}
+        {@render pillRadioGroup(language.diffView, 'viewStyle', viewOptions, viewStyle, (v) => (viewStyle = v as ViewStyle), isFlatText)}        
+        {@render checkboxToggle(language.diffLegacy, isFlatText, (v) => (isFlatText = v))}
+        {@render checkboxToggle(language.diffGrouped, isGrouped, (v) => (isGrouped = v), isFlatText || diffStyle !== 'line' || viewStyle === 'split', true)}
+        {@render checkboxToggle(language.diffOnlyChanges, showOnlyChanges, (v) => (showOnlyChanges = v), isFlatText, true)}
         {#if !isFlatText && showOnlyChanges}
-          {@render rangeControl('Context', contextRadius, (v) => (contextRadius = v), 0, 5)}
+          {@render rangeControl(language.diffContext, contextRadius, (v) => (contextRadius = v), 0, 5)}
         {/if}
       </div>
 
@@ -1611,12 +1612,12 @@
           <div class="flex items-center justify-between mb-3 text-xs text-textcolor2">
             {@render renderCounts(cardDiffResult.counts)}
             <div class="text-xs text-textcolor2 flex items-center gap-2 flex-wrap">
-              <span class="text-textcolor2">Cards changed:</span>
+              <span class="text-textcolor2">{language.diffCardsChanged}</span>
               <span class="text-textcolor">{cardChangedTotal}</span>
               <span class="text-textcolor2/60">/</span>
-              <span class="text-textcolor2">compared {cardDiffResult.parts.length}</span>
+              <span class="text-textcolor2">{language.diffCompared.replace('{count}', String(cardDiffResult.parts.length))}</span>
               <span class="text-textcolor2/60">·</span>
-              <span class="text-textcolor2">total {firstCards.length} → {secondCards.length}</span>
+              <span class="text-textcolor2">{language.diffTotal.replace('{from}', String(firstCards.length)).replace('{to}', String(secondCards.length))}</span>
               <span class="text-textcolor2/60">·</span>
               <span class="inline-flex items-center gap-1 text-blue-300">
                 ~{cardDiffResult.cardCounts.modifiedCount}
@@ -1655,7 +1656,7 @@
                 <!-- body -->
                 <div class="mt-2 border-t border-darkborderc pt-2 font-mono text-sm leading-5">
                   {#if bodyParts.length === 0}
-                    <div class="text-textcolor2 italic">No body content</div>
+                    <div class="text-textcolor2 italic">{language.diffNoBody}</div>
                   {:else}
                     {@const segments = buildSegments(bodyParts, { showOnlyChanges, contextRadius, scope: `card-${idx}`, expandedRanges })}
                     {#each segments as seg, sIdx (sIdx)}
@@ -1766,7 +1767,7 @@
             {/each}
           </div>
         {:else}
-          <div class="text-textcolor2 text-sm">No diff computed yet.</div>
+          <div class="text-textcolor2 text-sm">{language.diffNotComputed}</div>
         {/if}
       {:else}<!-- raw view -->
         {#if currentFlatResult}
@@ -1777,7 +1778,7 @@
             <div class="flex items-center justify-center py-10">
               <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-darkborderc bg-black/30 text-textcolor2">
                 <span class="inline-block w-2 h-2 rounded-full bg-green-500/70"></span>
-                <span class="text-sm">No changes</span>
+                <span class="text-sm">{language.diffNoChanges}</span>
               </div>
             </div>
           {:else if viewStyle === 'unified' || isFlatText}
@@ -1833,7 +1834,7 @@
             </div>
           {/if}
         {:else}
-          <div class="text-textcolor2 text-sm">No diff computed yet.</div>
+          <div class="text-textcolor2 text-sm">{language.diffNotComputed}</div>
         {/if}
       {/if}
     </div>

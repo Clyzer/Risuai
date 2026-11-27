@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { language } from "src/lang";
     
 import { DBState } from 'src/ts/stores.svelte';
     import { openURL } from "src/ts/globalApi.svelte";
@@ -120,15 +121,15 @@ let specialDay = $state('')
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <span class="text-2xl font-extralight italic text-amber-400 hover:text-amber-600 cursor-pointer transition" role="button" tabindex="-1" onclick={() => {
             openURL('https://risuai.net')
-        }}>Happy {
-            new Date().getFullYear() - 2023
-        }{getNumberPostfix(new Date().getFullYear() - 2023)} Anniversary!</span>
+        }}>{language.happyAnniversary
+            .replace('{n}', String(new Date().getFullYear() - 2023))
+            .replace('{suffix}', getNumberPostfix(new Date().getFullYear() - 2023))}</span>
     </h1>
 {/if}
 {#if clicks >= 5}
     <div class="bg-black w-full p-3 mt-4 mb-4 rounded-md max-w-2xl" id="minigame-div">
-        <span class="font-semibold text-lg">Score: {score}</span><br>
-        <span class="font-semibold text-lg">Time: {time.toFixed(0)}</span>
+        <span class="font-semibold text-lg">{language.minigameScore.replace('{score}', String(score))}</span><br>
+        <span class="font-semibold text-lg">{language.minigameTime.replace('{time}', time.toFixed(0))}</span>
         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <img src="./santa.png" alt="santa"

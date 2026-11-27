@@ -120,7 +120,7 @@
      */
     async function fetchWavespeedModels() {
         if (!DBState.db.wavespeedImage.key || DBState.db.wavespeedImage.key.trim() === '') {
-            alertError('WaveSpeed API Key not set');
+            alertError(language.wavespeedKeyNotSet);
             return [];
         }
 
@@ -134,7 +134,7 @@
             });
 
             if (!result.ok || !result.data) {
-                alertError('Failed to fetch WaveSpeed models');
+                alertError(language.wavespeedFetchFailed);
                 return;
             }
 
@@ -142,12 +142,12 @@
             try {
                 responseData = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
             } catch (e) {
-                alertError('Failed to parse WaveSpeed response');
+                alertError(language.wavespeedParseFailed);
                 return;
             }
 
             if (responseData.code !== 200 || !Array.isArray(responseData.data)) {
-                alertError('Invalid WaveSpeed API response');
+                alertError(language.wavespeedInvalidResponse);
                 return;
             }
 
@@ -174,9 +174,9 @@
               .sort((a, b) => a.name.localeCompare(b.model_id));
 
             wavespeedModels = filteredModels;
-            alertNormal(`Successfully loaded ${filteredModels.length} models`);
+            alertNormal(language.modelsLoaded.replace('{count}', String(filteredModels.length)));
         } catch (error) {
-            alertError(`Failed to fetch models: ${error}`);
+            alertError(language.fetchModelsFailed.replace('{error}', String(error)));
         } finally {
             isWavespeedLoading = false;
         }
@@ -208,7 +208,7 @@
     function getModelDisplayName(model: WavespeedModel): string {
         const imageInputIcon = model.supportsImageInput ? '✓' : '✗';
         const loraIcon = model.supportsLoras ? '✓' : '✗';
-        return `${model.name} (price: ${model.base_price}) [${imageInputIcon} Image] [${loraIcon} LoRA]`;
+        return `${model.name} (${language.priceLabel}: ${model.base_price}) [${imageInputIcon} ${language.image}] [${loraIcon} LoRA]`;
     }
 
     /**
@@ -269,7 +269,7 @@
     <Accordion name={language.imageGeneration} styled disabled={submenu !== -1}>
         <span class="text-textcolor mt-2">{language.imageGeneration} {language.provider} <Help key="sdProvider"/></span>
         <SelectInput className="mt-2 mb-4" bind:value={DBState.db.sdProvider}>
-            <OptionInput value="" >None</OptionInput>
+            <OptionInput value="" >{language.none}</OptionInput>
             <OptionInput value="webui" >Stable Diffusion WebUI</OptionInput>
             <OptionInput value="novelai" >Novel AI</OptionInput>
             <OptionInput value="dalle" >Dall-E</OptionInput>
@@ -277,7 +277,7 @@
             <OptionInput value="fal" >Fal.ai</OptionInput>
             <OptionInput value="comfyui" >ComfyUI</OptionInput>
             <OptionInput value="Imagen" >Imagen</OptionInput>
-            <OptionInput value="openai-compat" >OpenAI Compatible</OptionInput>
+            <OptionInput value="openai-compat" >{language.openAICompatible}</OptionInput>
             <OptionInput value="wavespeed" >WaveSpeedAI</OptionInput>
 
             <!-- Legacy -->
@@ -287,28 +287,28 @@
         </SelectInput>
 
         {#if DBState.db.sdProvider === 'webui'}
-        <span class="text-draculared text-xs mb-2">You must use WebUI with --api flag</span>
-            <span class="text-draculared text-xs mb-2">You must use WebUI without agpl license or use unmodified version with agpl license to observe the contents of the agpl license.</span>
+        <span class="text-draculared text-xs mb-2">{language.sdWebuiApiFlagWarn}</span>
+            <span class="text-draculared text-xs mb-2">{language.sdWebuiAgplWarn}</span>
             {#if !isTauri}
-                <span class="text-draculared text-xs mb-2">You are using web version. you must use ngrok or other tunnels to use your local webui.</span>
+                <span class="text-draculared text-xs mb-2">{language.webVersionTunnelWarn}</span>
             {/if}
-            <span class="text-textcolor mt-2">WebUI {language.providerURL}</span>
+            <span class="text-textcolor mt-2">{language.providerURLFor.replace('{provider}', 'WebUI')}</span>
             <TextInput size="sm" marginBottom placeholder="https://..." bind:value={DBState.db.webUiUrl}/>
-            <span class="text-textcolor">Steps</span>
+            <span class="text-textcolor">{language.steps}</span>
             <NumberInput size="sm" marginBottom min={0} max={100} bind:value={DBState.db.sdSteps}/>
 
             <span class="text-textcolor">CFG Scale</span>
             <NumberInput size="sm" marginBottom min={0} max={20} bind:value={DBState.db.sdCFG}/>
 
-            <span class="text-textcolor">Width</span>
+            <span class="text-textcolor">{language.width}</span>
             <NumberInput size="sm" marginBottom min={0} max={2048} bind:value={DBState.db.sdConfig.width}/>
-            <span class="text-textcolor">Height</span>
+            <span class="text-textcolor">{language.height}</span>
             <NumberInput size="sm" marginBottom min={0} max={2048} bind:value={DBState.db.sdConfig.height}/>
             <span class="text-textcolor">Sampler</span>
             <TextInput size="sm" marginBottom bind:value={DBState.db.sdConfig.sampler_name}/>
 
             <div class="flex items-center mt-2">
-                <Check bind:check={DBState.db.sdConfig.enable_hr} name='Enable Hires'/>
+                <Check bind:check={DBState.db.sdConfig.enable_hr} name={language.enableHires}/>
             </div>
             {#if DBState.db.sdConfig.enable_hr === true}
                 <span class="text-textcolor">denoising_strength</span>
@@ -321,12 +321,12 @@
         {/if}
 
         {#if DBState.db.sdProvider === 'novelai'}
-            <span class="text-textcolor mt-2">Novel AI {language.providerURL}</span>
+            <span class="text-textcolor mt-2">{language.providerURLFor.replace('{provider}', 'Novel AI')}</span>
             <TextInput size="sm" marginBottom placeholder="https://image.novelai.net" bind:value={DBState.db.NAIImgUrl}/>
-            <span class="text-textcolor">API Key</span>
+            <span class="text-textcolor">{language.apiKey}</span>
             <TextInput size="sm" marginBottom placeholder="pst-..." bind:value={DBState.db.NAIApiKey}/>
 
-            <span class="text-textcolor">Model</span>
+            <span class="text-textcolor">{language.model}</span>
             <SelectInput className="mb-4" bind:value={DBState.db.NAIImgModel} >
                 <OptionInput value="nai-diffusion-5-full" >nai-diffusion-5-full</OptionInput>
                 <OptionInput value="nai-diffusion-5-full-medium" >nai-diffusion-5-full-medium</OptionInput>
@@ -339,9 +339,9 @@
                 <OptionInput value="nai-diffusion-furry-3" >nai-diffusion-furry-3</OptionInput>
             </SelectInput>
 
-            <span class="text-textcolor">Width</span>
+            <span class="text-textcolor">{language.width}</span>
             <NumberInput size="sm" marginBottom min={0} max={2048} bind:value={DBState.db.NAIImgConfig.width}/>
-            <span class="text-textcolor">Height</span>
+            <span class="text-textcolor">{language.height}</span>
             <NumberInput size="sm" marginBottom min={0} max={2048} bind:value={DBState.db.NAIImgConfig.height}/>
             <span class="text-textcolor">Sampler</span>
 
@@ -369,7 +369,7 @@
                 </SelectInput>
             {/if}
 
-            <span class="text-textcolor">Noise Schedule</span>
+            <span class="text-textcolor">{language.noiseSchedule}</span>
             <SelectInput className="mb-4" bind:value={DBState.db.NAIImgConfig.noise_schedule}>
                 <OptionInput value="native" >native</OptionInput>
                 <OptionInput value="karras" >karras</OptionInput>
@@ -377,19 +377,19 @@
                 <OptionInput value="polyexponential" >polyexponential</OptionInput>
             </SelectInput>
 
-            <span class="text-textcolor">steps</span>
+            <span class="text-textcolor">{language.steps}</span>
             <NumberInput size="sm" marginBottom min={0} max={2048} bind:value={DBState.db.NAIImgConfig.steps}/>
             <span class="text-textcolor">CFG scale</span>
             <NumberInput size="sm" marginBottom min={0} max={2048} bind:value={DBState.db.NAIImgConfig.scale}/>
             <span class="text-textcolor">CFG rescale</span>
             <NumberInput size="sm" marginBottom min={0} max={1} bind:value={DBState.db.NAIImgConfig.cfg_rescale}/>
 
-            <span class="text-textcolor">Image Reference</span>
+            <span class="text-textcolor">{language.imageReference}</span>
             <SelectInput className="mb-4" bind:value={DBState.db.NAIImgConfig.reference_mode}>
-                <OptionInput value="" >None</OptionInput>
+                <OptionInput value="" >{language.none}</OptionInput>
                 <OptionInput value="vibe" >Vibe Trasfer</OptionInput>
                 {#if DBState.db.NAIImgModel === 'nai-diffusion-4-5-full' || DBState.db.NAIImgModel === 'nai-diffusion-4-5-curated'}
-                    <OptionInput value="character" >Character Reference</OptionInput>
+                    <OptionInput value="character" >{language.characterReference}</OptionInput>
                 {/if}
             </SelectInput>
 
@@ -403,7 +403,7 @@
                     try {
                         const vibeData = JSON.parse(new TextDecoder().decode(file.data))
                         if (vibeData.version !== 1 || vibeData.identifier !== "novelai-vibe-transfer") {
-                            alertError("Invalid vibe file. Version must be 1.")
+                            alertError(language.invalidVibeFile)
                             return
                         }
 
@@ -442,15 +442,15 @@
                             DBState.db.NAIImgConfig.reference_strength_multiple = [0.7];
                         }
                     } catch (error) {
-                        alertError("Error parsing vibe file: " + error)
+                        alertError(language.vibeParseError + error)
                     }
                 }}>
                     {#if !DBState.db.NAIImgConfig.vibe_data || !DBState.db.NAIImgConfig.vibe_data.thumbnail}
                         <div class="rounded-md h-20 w-20 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500 flex items-center justify-center">
-                            <span class="text-sm">Upload<br />Vibe</span>
+                            <span class="text-sm">{language.upload}<br />Vibe</span>
                         </div>
                     {:else}
-                        <img src={DBState.db.NAIImgConfig.vibe_data.thumbnail} alt="Vibe Preview" class="rounded-md h-40 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500" />
+                        <img src={DBState.db.NAIImgConfig.vibe_data.thumbnail} alt={language.vibePreview} class="rounded-md h-40 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500" />
                     {/if}
                 </button>
 
@@ -462,7 +462,7 @@
                         }}
                         class="absolute top-2 right-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded-sm"
                     >
-                        Delete
+                        {language.deleteButton}
                     </button>
                 {/if}
 
@@ -470,7 +470,7 @@
 
                 {#if DBState.db.NAIImgConfig.vibe_data}
 
-                    <span class="text-textcolor">Vibe Model</span>
+                    <span class="text-textcolor">{language.vibeModel}</span>
                     <SelectInput className="mb-2" bind:value={DBState.db.NAIImgConfig.vibe_model_selection} onchange={(e) => {
                         // When vibe model changes, set InfoExtracted to the first value
                         if (DBState.db.NAIImgConfig.vibe_data?.encodings &&
@@ -497,7 +497,7 @@
                         {/if}
                     </SelectInput>
 
-                    <span class="text-textcolor">Information Extracted</span>
+                    <span class="text-textcolor">{language.informationExtracted}</span>
                     <SelectInput className="mb-2" bind:value={DBState.db.NAIImgConfig.InfoExtracted}>
                         {#if DBState.db.NAIImgConfig.vibe_model_selection && DBState.db.NAIImgConfig.vibe_data.encodings[DBState.db.NAIImgConfig.vibe_model_selection]}
                             {#each Object.entries(DBState.db.NAIImgConfig.vibe_data.encodings[DBState.db.NAIImgConfig.vibe_model_selection]) as [key, value]}
@@ -506,7 +506,7 @@
                         {/if}
                     </SelectInput>
 
-                    <span class="text-textcolor">Reference Strength Multiple</span>
+                    <span class="text-textcolor">{language.referenceStrengthMultiple}</span>
                     <SliderInput marginBottom min={0} max={1} step={0.1} fixed={2} bind:value={DBState.db.NAIImgConfig.reference_strength_multiple[0]} />
                 {/if}
             {/if}
@@ -535,15 +535,15 @@
                     }}>
                         {#if !DBState.db.NAIImgConfig.character_image || DBState.db.NAIImgConfig.character_image === ''}
                             <div class="rounded-md h-20 w-20 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500 flex items-center justify-center">
-                                <span class="text-sm">Upload<br />Image</span>
+                                <span class="text-sm">{language.upload}<br />{language.image}</span>
                             </div>
                         {:else}
                             {#await getCharImage(DBState.db.NAIImgConfig.character_image, 'plain')}
                                 <div class="rounded-md h-20 w-20 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500 flex items-center justify-center">
-                                    <span class="text-sm">Uploading<br />Image..</span>
+                                    <span class="text-sm">{language.uploading}<br />{language.image}..</span>
                                 </div>
                             {:then im}
-                                <img src={im} class="rounded-md h-40 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500" alt="Base Preview"/>
+                                <img src={im} class="rounded-md h-40 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500" alt={language.basePreview}/>
                             {/await}
                         {/if}
                     </button>
@@ -556,12 +556,12 @@
                             }}
                             class="absolute top-2 right-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded-sm"
                         >
-                            Delete
+                            {language.deleteButton}
                         </button>
                     {/if}
                 </div>
                 
-                <span class="text-textcolor2 text-xs mb-2 block">Leave blank to use the character's default image.</span>
+                <span class="text-textcolor2 text-xs mb-2 block">{language.leaveBlankCharImage}</span>
 
                 <Check className="mb-4" bind:check={DBState.db.NAIImgConfig.style_aware} name="Style Aware"/>
 
@@ -572,11 +572,11 @@
 
             {#if (DBState.db.NAIImgModel === 'nai-diffusion-3' || DBState.db.NAIImgModel === 'nai-diffusion-furry-3' || DBState.db.NAIImgModel === 'nai-diffusion-2')
             && DBState.db.NAIImgConfig.sampler !== 'ddim_v3'}
-                <Check bind:check={DBState.db.NAIImgConfig.sm} name="Use SMEA"/>
+                <Check bind:check={DBState.db.NAIImgConfig.sm} name={language.useFeature.replace('{feature}', 'SMEA')}/>
             {/if}
 
             {#if DBState.db.NAIImgModel === 'nai-diffusion-3' && DBState.db.NAIImgConfig.sampler !== 'ddim_v3'}
-                <Check bind:check={DBState.db.NAIImgConfig.sm_dyn} name='Use DYN'/>
+                <Check bind:check={DBState.db.NAIImgConfig.sm_dyn} name={language.useFeature.replace('{feature}', 'DYN')}/>
             {/if}
 
             {#if DBState.db.NAIImgModel === 'nai-diffusion-4-5-full' || DBState.db.NAIImgModel === 'nai-diffusion-4-5-curated' 
@@ -591,10 +591,10 @@
 
             {#if DBState.db.NAIImgModel === 'nai-diffusion-4-full'
             || DBState.db.NAIImgModel === 'nai-diffusion-4-curated-preview'}
-                <Check bind:check={DBState.db.NAIImgConfig.legacy_uc} name='Use legacy uc'/>
+                <Check bind:check={DBState.db.NAIImgConfig.legacy_uc} name={language.useLegacyUc}/>
             {/if}
                 
-            <Check className="mt-4 mb-4" bind:check={DBState.db.NAII2I} name="Enable I2I"/>
+            <Check className="mt-4 mb-4" bind:check={DBState.db.NAII2I} name={language.enableI2I}/>
             
             {#if DBState.db.NAII2I}
                 <div class="relative">
@@ -614,15 +614,15 @@
                     }}>
                         {#if !DBState.db.NAIImgConfig.image || DBState.db.NAIImgConfig.image === ''}
                             <div class="rounded-md h-20 w-20 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500 flex items-center justify-center">
-                                <span class="text-sm">Upload<br />Image</span>
+                                <span class="text-sm">{language.upload}<br />{language.image}</span>
                             </div>
                         {:else}
                             {#await getCharImage(DBState.db.NAIImgConfig.image, 'plain')}
                                 <div class="rounded-md h-20 w-20 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500 flex items-center justify-center">
-                                    <span class="text-sm">Uploading<br />Image..</span>
+                                    <span class="text-sm">{language.uploading}<br />{language.image}..</span>
                                 </div>
                             {:then im}
-                                <img src={im} class="rounded-md h-40 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500" alt="Base Preview"/>
+                                <img src={im} class="rounded-md h-40 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500" alt={language.basePreview}/>
                             {/await}
                         {/if}
                     </button>
@@ -635,16 +635,16 @@
                             }}
                             class="absolute top-2 right-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded-sm"
                         >
-                            Delete
+                            {language.deleteButton}
                         </button>
                     {/if}
                 </div>
-                <span class="text-textcolor2 text-xs block">Leave blank to use the character's default image.</span>
+                <span class="text-textcolor2 text-xs block">{language.leaveBlankCharImage}</span>
 
 
-                <span class="text-textcolor mt-2">Strength</span>
+                <span class="text-textcolor mt-2">{language.strength}</span>
                 <SliderInput min={0} max={0.99} step={0.01} fixed={2} bind:value={DBState.db.NAIImgConfig.strength}/>
-                <span class="text-textcolor mt-2">Noise</span>
+                <span class="text-textcolor mt-2">{language.noise}</span>
                 <SliderInput min={0} max={0.99} step={0.01} fixed={2} bind:value={DBState.db.NAIImgConfig.noise}/>
 
 
@@ -654,22 +654,22 @@
          
         
         {#if DBState.db.sdProvider === 'dalle'}
-            <span class="text-textcolor">OpenAI API Key</span>
+            <span class="text-textcolor">{language.apiKeyFor.replace('{provider}', 'OpenAI')}</span>
             <TextInput size="sm" marginBottom placeholder="sk-..." bind:value={DBState.db.openAIKey}/>
 
-            <span class="text-textcolor mt-4">Dall-E Quality</span>
+            <span class="text-textcolor mt-4">{language.qualityFor.replace('{provider}', 'Dall-E')}</span>
             <SelectInput className="mt-2 mb-4" bind:value={DBState.db.dallEQuality}>
-                <OptionInput value="standard" >Standard</OptionInput>
+                <OptionInput value="standard" >{language.qualityStandard}</OptionInput>
                 <OptionInput value="hd" >HD</OptionInput>
             </SelectInput>
 
         {/if}
 
         {#if DBState.db.sdProvider === 'stability'}
-            <span class="text-textcolor">Stability API Key</span>
+            <span class="text-textcolor">{language.apiKeyFor.replace('{provider}', 'Stability')}</span>
             <TextInput size="sm" marginBottom placeholder="..." bind:value={DBState.db.stabilityKey}/>
 
-            <span class="text-textcolor">Stability Model</span>
+            <span class="text-textcolor">{language.modelFor.replace('{provider}', 'Stability')}</span>
             <SelectInput className="mt-2 mb-4" bind:value={DBState.db.stabilityModel}>
                 <OptionInput value="ultra" >SD Ultra</OptionInput>
                 <OptionInput value="core" >SD Core</OptionInput>
@@ -678,9 +678,9 @@
             </SelectInput>
 
             {#if DBState.db.stabilityModel === 'core'}
-                <span class="text-textcolor">SD Core Style</span>
+                <span class="text-textcolor">{language.styleFor.replace('{model}', 'SD Core')}</span>
                 <SelectInput className="mt-2 mb-4" bind:value={DBState.db.stabllityStyle}>
-                    <OptionInput value="" >Unspecified</OptionInput>
+                    <OptionInput value="" >{language.unspecified}</OptionInput>
                     <OptionInput value="3d-model" >3D Model</OptionInput>
                     <OptionInput value="analog-film" >Analog Film</OptionInput>
                     <OptionInput value="anime" >Anime</OptionInput>
@@ -703,7 +703,7 @@
         {/if}
 
         {#if DBState.db.sdProvider === 'comfyui'}
-            <span class="text-textcolor mt-2">ComfyUI {language.providerURL}</span>
+            <span class="text-textcolor mt-2">{language.providerURLFor.replace('{provider}', 'ComfyUI')}</span>
             <TextInput size="sm" marginBottom placeholder="http://127.0.0.1:8188" bind:value={DBState.db.comfyUiUrl}/>
 
             <span class="text-textcolor">{language.comfyWorkflow} <Help key="comfyWorkflow" /></span>
@@ -712,54 +712,54 @@
                 <button class="text-textcolor2 hover:text-green-500 cursor-pointer" onclick={importComfyWorkflow}><HardDriveUploadIcon size={24}/></button>
             </div>
 
-            <span class="text-textcolor">Timeout (sec)</span>
+            <span class="text-textcolor">{language.timeoutSec}</span>
             <NumberInput size="sm" marginBottom bind:value={DBState.db.comfyConfig.timeout} min={1} max={120} />
         {/if}
 
         {#if DBState.db.sdProvider === 'comfy'}
-            <span class="text-draculared text-xs mb-2">The first image generated by the prompt will be selected. </span>
+            <span class="text-draculared text-xs mb-2">{language.comfyFirstImageSelected}</span>
             {#if !isTauri}
-                <span class="text-draculared text-xs mb-2">"Please run comfyUI with --enable-cors-header."</span>
+                <span class="text-draculared text-xs mb-2">{language.comfyCorsWarn}</span>
             {/if}
-            <span class="text-textcolor mt-2">ComfyUI {language.providerURL}</span>
+            <span class="text-textcolor mt-2">{language.providerURLFor.replace('{provider}', 'ComfyUI')}</span>
             <TextInput size="sm" marginBottom placeholder="http://127.0.0.1:8188" bind:value={DBState.db.comfyUiUrl}/>
-            <span class="text-textcolor">Workflow</span>
-            <TextInput size="sm" marginBottom placeholder="valid ComfyUI API json (Enable Dev mode Options in ComfyUI)" bind:value={DBState.db.comfyConfig.workflow}/>
+            <span class="text-textcolor">{language.workflow}</span>
+            <TextInput size="sm" marginBottom placeholder={language.comfyWorkflowPlaceholder} bind:value={DBState.db.comfyConfig.workflow}/>
 
-            <span class="text-textcolor">Positive Text Node: ID</span>
-            <TextInput size="sm" marginBottom placeholder="eg. 1, 3, etc" bind:value={DBState.db.comfyConfig.posNodeID}/>
-            <span class="text-textcolor">Positive Text Node: Input Field Name</span>
-            <TextInput size="sm" marginBottom placeholder="eg. text" bind:value={DBState.db.comfyConfig.posInputName}/>
-            <span class="text-textcolor">Negative Text Node: ID</span>
-            <TextInput size="sm" marginBottom placeholder="eg. 1, 3, etc" bind:value={DBState.db.comfyConfig.negNodeID}/>
-            <span class="text-textcolor">Positive Text Node: Input Field Name</span>
-            <TextInput size="sm" marginBottom placeholder="eg. text" bind:value={DBState.db.comfyConfig.negInputName}/>
-            <span class="text-textcolor">Timeout (sec)</span>
+            <span class="text-textcolor">{language.comfyPosNodeId}</span>
+            <TextInput size="sm" marginBottom placeholder={language.egNodeIds} bind:value={DBState.db.comfyConfig.posNodeID}/>
+            <span class="text-textcolor">{language.comfyPosInputName}</span>
+            <TextInput size="sm" marginBottom placeholder={language.egText} bind:value={DBState.db.comfyConfig.posInputName}/>
+            <span class="text-textcolor">{language.comfyNegNodeId}</span>
+            <TextInput size="sm" marginBottom placeholder={language.egNodeIds} bind:value={DBState.db.comfyConfig.negNodeID}/>
+            <span class="text-textcolor">{language.comfyNegInputName}</span>
+            <TextInput size="sm" marginBottom placeholder={language.egText} bind:value={DBState.db.comfyConfig.negInputName}/>
+            <span class="text-textcolor">{language.timeoutSec}</span>
             <NumberInput size="sm" marginBottom bind:value={DBState.db.comfyConfig.timeout} min={1} max={120} />
         {/if}
 
         {#if DBState.db.sdProvider === 'fal'}
-            <span class="text-textcolor">Fal.ai API Key</span>
+            <span class="text-textcolor">{language.apiKeyFor.replace('{provider}', 'Fal.ai')}</span>
             <TextInput size="sm" marginBottom placeholder="..." bind:value={DBState.db.falToken}/>
 
-            <span class="text-textcolor mt-4">Width</span>
+            <span class="text-textcolor mt-4">{language.width}</span>
             <NumberInput size="sm" marginBottom min={0} max={2048} bind:value={DBState.db.sdConfig.width}/>
-            <span class="text-textcolor mt-4">Height</span>
+            <span class="text-textcolor mt-4">{language.height}</span>
             <NumberInput size="sm" marginBottom min={0} max={2048} bind:value={DBState.db.sdConfig.height}/>
 
-            <span class="text-textcolor mt-4">Model</span>
+            <span class="text-textcolor mt-4">{language.model}</span>
             <SelectInput className="mt-2" bind:value={DBState.db.falModel}>
                 <OptionInput value="fal-ai/flux/dev" >Flux[Dev]</OptionInput>
-                <OptionInput value="fal-ai/flux-lora" >Flux[Dev] with Lora</OptionInput>
+                <OptionInput value="fal-ai/flux-lora" >{language.fluxDevWithLora}</OptionInput>
                 <OptionInput value="fal-ai/flux-pro" >Flux[Pro]</OptionInput>
                 <OptionInput value="fal-ai/flux/schnell" >Flux[Schnell]</OptionInput>
             </SelectInput>
 
             {#if DBState.db.falModel === 'fal-ai/flux-lora'}
-                <span class="text-textcolor mt-4">Lora Model URL <Help key="urllora" /></span>
+                <span class="text-textcolor mt-4">{language.loraModelUrl} <Help key="urllora" /></span>
                 <TextInput size="sm" marginBottom bind:value={DBState.db.falLora}/>
 
-                <span class="text-textcolor mt-4">Lora Weight</span>
+                <span class="text-textcolor mt-4">{language.loraWeight}</span>
                 <SliderInput fixed={2} min={0}  max={2} step={0.01} bind:value={DBState.db.falLoraScale}/>
             {/if}
 
@@ -767,10 +767,10 @@
         {/if}
 
         {#if DBState.db.sdProvider === 'Imagen'}
-            <span class="text-textcolor mt-2">GoogleAI API Key</span>
+            <span class="text-textcolor mt-2">{language.apiKeyFor.replace('{provider}', 'GoogleAI')}</span>
             <TextInput marginBottom={true} size={"sm"} placeholder="..." hideText={DBState.db.hideApiKey} bind:value={DBState.db.google.accessToken}/>
             
-            <span class="text-textcolor">Model</span>
+            <span class="text-textcolor">{language.model}</span>
             <SelectInput className="mb-4" bind:value={DBState.db.ImagenModel}>
                 <OptionInput value="imagen-4.0-generate-001" >Imagen 4</OptionInput>
                 <OptionInput value="imagen-4.0-ultra-generate-001" >Imagen 4 Ultra</OptionInput>
@@ -779,14 +779,14 @@
             </SelectInput>
 
             {#if DBState.db.ImagenModel === 'imagen-4.0-generate-001' || DBState.db.ImagenModel === 'imagen-4.0-ultra-generate-001'}
-                <span class="text-textcolor">Image size</span>
+                <span class="text-textcolor">{language.imageSize}</span>
                 <SelectInput className="mb-4" bind:value={DBState.db.ImagenImageSize}>
                     <OptionInput value="1K" >1K</OptionInput>
                     <OptionInput value="2K" >2K</OptionInput>
                 </SelectInput>
             {/if}
 
-            <span class="text-textcolor">Aspect ratio</span>
+            <span class="text-textcolor">{language.aspectRatio}</span>
             <SelectInput className="mb-4" bind:value={DBState.db.ImagenAspectRatio}>
                 <OptionInput value="1:1" >1:1</OptionInput>
                 <OptionInput value="3:4" >3:4</OptionInput>
@@ -795,25 +795,25 @@
                 <OptionInput value="16:9" >16:9</OptionInput>
             </SelectInput>
 
-            <span class="text-textcolor">Person generation</span>
+            <span class="text-textcolor">{language.personGeneration}</span>
             <SelectInput className="mb-4" bind:value={DBState.db.ImagenPersonGeneration}>
-                <OptionInput value="allow_all" >Allow all</OptionInput>
-                <OptionInput value="allow_adult" >Allow adult</OptionInput>
-                <OptionInput value="dont_allow" >Don't allow</OptionInput>
+                <OptionInput value="allow_all" >{language.allowAll}</OptionInput>
+                <OptionInput value="allow_adult" >{language.allowAdult}</OptionInput>
+                <OptionInput value="dont_allow" >{language.dontAllow}</OptionInput>
             </SelectInput>
         {/if}
 
         {#if DBState.db.sdProvider === 'openai-compat'}
-            <span class="text-textcolor mt-2">API URL</span>
+            <span class="text-textcolor mt-2">{language.apiUrl}</span>
             <TextInput size="sm" marginBottom placeholder="https://api.example.com/v1/images/generations" bind:value={DBState.db.openaiCompatImage.url}/>
 
-            <span class="text-textcolor">API Key</span>
+            <span class="text-textcolor">{language.apiKey}</span>
             <TextInput size="sm" marginBottom placeholder="sk-..." hideText={DBState.db.hideApiKey} bind:value={DBState.db.openaiCompatImage.key}/>
 
-            <span class="text-textcolor">Model</span>
+            <span class="text-textcolor">{language.model}</span>
             <TextInput size="sm" marginBottom placeholder="dall-e-3" bind:value={DBState.db.openaiCompatImage.model}/>
 
-            <span class="text-textcolor">Image Size</span>
+            <span class="text-textcolor">{language.imageSize}</span>
             <SelectInput className="mb-4" bind:value={DBState.db.openaiCompatImage.size}>
                 <OptionInput value="1024x1024" >1024x1024</OptionInput>
                 <OptionInput value="1536x1024" >1536x1024</OptionInput>
@@ -822,35 +822,35 @@
                 <OptionInput value="256x256" >256x256</OptionInput>
             </SelectInput>
 
-            <span class="text-textcolor">Quality</span>
+            <span class="text-textcolor">{language.quality}</span>
             <SelectInput className="mb-4" bind:value={DBState.db.openaiCompatImage.quality}>
-                <OptionInput value="auto" >Auto</OptionInput>
-                <OptionInput value="low" >Low</OptionInput>
-                <OptionInput value="medium" >Medium</OptionInput>
-                <OptionInput value="high" >High</OptionInput>
+                <OptionInput value="auto" >{language.qualityAuto}</OptionInput>
+                <OptionInput value="low" >{language.qualityLow}</OptionInput>
+                <OptionInput value="medium" >{language.qualityMedium}</OptionInput>
+                <OptionInput value="high" >{language.qualityHigh}</OptionInput>
             </SelectInput>
         {/if}
 
         {#if DBState.db.sdProvider === 'wavespeed'}
-            <span class="text-textcolor">API Key</span>
+            <span class="text-textcolor">{language.apiKey}</span>
             <TextInput size="sm" marginBottom placeholder="sk-..." hideText={DBState.db.hideApiKey} bind:value={DBState.db.wavespeedImage.key}/>
 
-            <span class="text-textcolor">Model</span>
+            <span class="text-textcolor">{language.model}</span>
             <button
               class="px-3 py-2 bg-darkbutton rounded-md hover:bg-textcolor2 transition-colors disabled:opacity-50"
               disabled={isWavespeedLoading}
               onclick={fetchWavespeedModels}
             >
-                {isWavespeedLoading ? 'Loading...' : 'Refresh Models'}
+                {isWavespeedLoading ? language.loadingEllipsis : language.refreshModels}
             </button>
             <TextInput
               bind:value={wavespeedSearchQuery}
-              placeholder="Search models..."
+              placeholder={language.openRouterSearchModel}
               size="sm"
               marginBottom
             />
             <SelectInput className="mb-4" bind:value={DBState.db.wavespeedImage.model} onchange={handleModelChange}>
-                <OptionInput value="" >Select a model...</OptionInput>
+                <OptionInput value="" >{language.selectModelEllipsis}</OptionInput>
                 {#if wavespeedModels.length > 0}
                     {#each getFilteredModels() as model}
                         <OptionInput value={model.model_id}>
@@ -869,7 +869,7 @@
                       size="sm"
                       marginBottom
                       marginTop
-                      placeholder={`LoRA ${index + 1} URL (optional)`}
+                      placeholder={language.loraUrlOptional.replace('{index}', String(index + 1))}
                       bind:value={lora.path}
                     />
                     <SliderInput
@@ -882,20 +882,20 @@
                     />
                 {/each}
                 <span class="text-textcolor2 text-xs mb-2 block">
-                    Only .safetensors files are supported. Use owner/model-name (Hugging Face) or direct URL (Civitai).
+                    {language.wavespeedLoraHint}
                 </span>
             {:else}
                 <span class="text-textcolor2 text-xs mb-2 block">
-                    Model does not support LoRA. Or refresh model list to update model status.
+                    {language.wavespeedNoLora}
                 </span>
             {/if}
 
-            <span class="text-textcolor">Image Reference</span>
+            <span class="text-textcolor">{language.imageReference}</span>
             {#if wavespeedModels.find(m => m.model_id === DBState.db.wavespeedImage.model)?.supportsImageInput}
                 <SelectInput className="mb-4" bind:value={DBState.db.wavespeedImage.reference_mode}>
-                    <OptionInput value="" >None</OptionInput>
-                    <OptionInput value="image" >Upload Image</OptionInput>
-                    <OptionInput value="character" >Use Character Image</OptionInput>
+                    <OptionInput value="" >{language.none}</OptionInput>
+                    <OptionInput value="image" >{language.uploadImage}</OptionInput>
+                    <OptionInput value="character" >{language.useCharacterImage}</OptionInput>
                 </SelectInput>
 
                 {#if DBState.db.wavespeedImage.reference_mode === 'image'}
@@ -920,15 +920,15 @@
                         }}>
                             {#if !DBState.db.wavespeedImage.reference_image || DBState.db.wavespeedImage.reference_image === ''}
                                 <div class="rounded-md h-20 w-20 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500 flex items-center justify-center">
-                                    <span class="text-sm">Upload<br />Image</span>
+                                    <span class="text-sm">{language.upload}<br />{language.image}</span>
                                 </div>
                             {:else}
                                 {#await getCharImage(DBState.db.wavespeedImage.reference_image, 'plain')}
                                     <div class="rounded-md h-20 w-20 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500 flex items-center justify-center">
-                                        <span class="text-sm">Uploading<br />Image..</span>
+                                        <span class="text-sm">{language.uploading}<br />{language.image}..</span>
                                     </div>
                                 {:then im}
-                                    <img src={im} class="rounded-md h-40 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500" alt="Base Preview"/>
+                                    <img src={im} class="rounded-md h-40 shadow-lg bg-textcolor2 cursor-pointer hover:text-green-500" alt={language.basePreview}/>
                                 {/await}
                             {/if}
                         </button>
@@ -941,17 +941,17 @@
                                 }}
                               class="absolute top-2 right-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded-sm"
                             >
-                                Delete
+                                {language.deleteButton}
                             </button>
                         {/if}
                     </div>
                 {/if}
                 {#if DBState.db.wavespeedImage.reference_mode === 'character'}
-                    <span class="text-textcolor2 text-xs mb-2 block">Use the character's default image.</span>
+                    <span class="text-textcolor2 text-xs mb-2 block">{language.useCharDefaultImage}</span>
                 {/if}
             {:else}
                 <span class="text-textcolor2 text-xs mb-2 block">
-                    Model does not support image input. Or refresh model list to update model status.
+                    {language.wavespeedNoImageInput}
                 </span>
             {/if}
         {/if}
@@ -960,24 +960,24 @@
 
 {#if submenu === 1 || submenu === -1}
 <Accordion name="TTS" styled disabled={submenu !== -1}>
-    <CheckInput bind:check={DBState.db.ttsAutoSpeech} name="Auto Speech" className="mt-2"/>
+    <CheckInput bind:check={DBState.db.ttsAutoSpeech} name={language.autoSpeech} className="mt-2"/>
 
-    <span class="text-textcolor mt-2">ElevenLabs API key</span>
+    <span class="text-textcolor mt-2">{language.apiKeyFor.replace('{provider}', 'ElevenLabs')}</span>
     <TextInput size="sm" marginBottom bind:value={DBState.db.elevenLabKey}/>
 
-    <span class="text-textcolor mt-2">VOICEVOX URL</span>
+    <span class="text-textcolor mt-2">{language.urlFor.replace('{provider}', 'VOICEVOX')}</span>
     <TextInput size="sm" marginBottom bind:value={DBState.db.voicevoxUrl}/>
 
-    <span class="text-textcolor">OpenAI Key</span>
+    <span class="text-textcolor">{language.keyFor.replace('{provider}', 'OpenAI')}</span>
     <TextInput size="sm" marginBottom bind:value={DBState.db.openAIKey}/>
 
-    <span class="text-textcolor mt-2">NovelAI API key</span>
+    <span class="text-textcolor mt-2">{language.apiKeyFor.replace('{provider}', 'NovelAI')}</span>
     <TextInput size="sm" marginBottom placeholder="pst-..." bind:value={DBState.db.NAIApiKey}/>
 
-    <span class="text-textcolor">Huggingface Key</span>
+    <span class="text-textcolor">{language.keyFor.replace('{provider}', 'Huggingface')}</span>
     <TextInput size="sm" marginBottom bind:value={DBState.db.huggingfaceKey} placeholder="hf_..."/>
 
-    <span class="text-textcolor">fish-speech API Key</span>
+    <span class="text-textcolor">{language.apiKeyFor.replace('{provider}', 'fish-speech')}</span>
     <TextInput size="sm" marginBottom bind:value={DBState.db.fishSpeechKey}/>
 
 </Accordion>
@@ -988,7 +988,7 @@
     <span class="text-textcolor mt-2">{language.emotionMethod}</span>
 
     <SelectInput className="mt-2 mb-4" bind:value={DBState.db.emotionProcesser}>
-        <OptionInput value="submodel" >Ax. Model</OptionInput>
+        <OptionInput value="submodel" >{language.axModelShort}</OptionInput>
         <OptionInput value="embedding" >MiniLM-L6-v2</OptionInput>
     </SelectInput>
 </Accordion>
@@ -1038,7 +1038,7 @@
                 DBState.db.hypaV3 = false
             }
         }}>
-            <OptionInput value="none" >None</OptionInput>
+            <OptionInput value="none" >{language.none}</OptionInput>
             <OptionInput value="supaMemory" >{language.SuperMemory}</OptionInput>
             <OptionInput value="hypaV2" >{language.HypaMemory} V2</OptionInput>
             <OptionInput value="hanuraiMemory" >{language.hanuraiMemory}</OptionInput>
@@ -1047,32 +1047,32 @@
 
         {#if DBState.db.hanuraiEnable}
             <span class="mb-2 text-textcolor2 text-sm text-wrap wrap-break-word max-w-full">{language.hanuraiDesc}</span>
-            <span>Chunk Size</span>
+            <span>{language.hypaChunkSize}</span>
             <NumberInput size="sm" marginBottom bind:value={DBState.db.hanuraiTokens} min={100} />
             <div class="flex mb-4">
-                <Check bind:check={DBState.db.hanuraiSplit} name="Text Spliting"/>
+                <Check bind:check={DBState.db.hanuraiSplit} name={language.textSplitting}/>
             </div>
         {:else if DBState.db.hypav2}
             <span class="mb-2 text-textcolor2 text-sm text-wrap wrap-break-word max-w-full">{language.hypaV2Desc}</span>
-            <span class="text-textcolor mt-4">{language.SuperMemory} {language.model}</span>
+            <span class="text-textcolor mt-4">{language.modelFor.replace('{provider}', language.SuperMemory)}</span>
             <SelectInput className="mt-2 mb-2" bind:value={DBState.db.supaModelType}>
-                <OptionInput value="distilbart">distilbart-cnn-6-6 (Free/Local)</OptionInput>
+                <OptionInput value="distilbart">distilbart-cnn-6-6 ({language.freeLocal})</OptionInput>
                 <OptionInput value="instruct35">OpenAI 3.5 Turbo Instruct</OptionInput>
                 <OptionInput value="subModel">{language.submodel}</OptionInput>
             </SelectInput>
             {#if DBState.db.supaModelType === 'davinci' || DBState.db.supaModelType === 'curie' || DBState.db.supaModelType === 'instruct35'}
-            <span class="text-textcolor">{language.SuperMemory} OpenAI Key</span>
+            <span class="text-textcolor">{language.openAIKeyFor.replace('{feature}', language.SuperMemory)}</span>
             <TextInput size="sm" marginBottom bind:value={DBState.db.supaMemoryKey}/>
             {/if}
             <span class="text-textcolor">{language.summarizationPrompt} <Help key="summarizationPrompt" /></span>
-            <TextAreaInput size="sm" bind:value={DBState.db.supaMemoryPrompt} placeholder="Leave it blank to use default"/>
+            <TextAreaInput size="sm" bind:value={DBState.db.supaMemoryPrompt} placeholder={language.leaveBlankForDefault}/>
             <span class="text-textcolor">{language.hypaChunkSize}</span>
             <NumberInput size="sm" marginBottom bind:value={DBState.db.hypaChunkSize} min={100} />
             <span class="text-textcolor">{language.hypaAllocatedTokens}</span>
             <NumberInput size="sm" marginBottom bind:value={DBState.db.hypaAllocatedTokens} min={100} />
         {:else if DBState.db.hypaV3}
             <span class="max-w-full mb-6 text-sm text-wrap wrap-break-word text-textcolor2">{language.hypaV3Settings.descriptionLabel}</span>
-            <span class="text-textcolor">Preset</span>
+            <span class="text-textcolor">{language.preset}</span>
             <select class={"risu-select border border-darkborderc focus:border-borderc rounded-md shadow-xs text-textcolor bg-transparent focus:ring-borderc focus:ring-2 focus:outline-hidden transition-colors duration-200 text-md px-4 py-2 mb-1"}
                 bind:value={DBState.db.hypaV3PresetId}
             >
@@ -1097,13 +1097,13 @@
                     const presets = DBState.db.hypaV3Presets
 
                     if(presets.length === 0){
-                        alertError("There must be least one preset.")
+                        alertError(language.atLeastOnePreset)
                         return
                     }
 
                     const id = DBState.db.hypaV3PresetId
                     const preset = presets[id]
-                    const newName = await alertInput(`Enter new name for ${preset.name}`, [], preset.name)
+                    const newName = await alertInput(language.enterNewNameFor.replace('{name}', preset.name), [], preset.name)
 
                     if (!newName || newName.trim().length === 0) return
 
@@ -1117,7 +1117,7 @@
                     const presets = DBState.db.hypaV3Presets
 
                     if(presets.length <= 1){
-                        alertError("There must be least one preset.")
+                        alertError(language.atLeastOnePreset)
                         return
                     }
 
@@ -1141,7 +1141,7 @@
                         const presets = DBState.db.hypaV3Presets
                         
                         if(presets.length === 0){
-                            alertError("There must be least one preset.")
+                            alertError(language.atLeastOnePreset)
                             return
                         }
 
@@ -1194,7 +1194,7 @@
             {#if DBState.db.hypaV3Presets?.[DBState.db.hypaV3PresetId]?.settings}
                 {@const settings = DBState.db.hypaV3Presets[DBState.db.hypaV3PresetId].settings}
 
-                <span class="text-textcolor">{language.SuperMemory} {language.model}</span>
+                <span class="text-textcolor">{language.modelFor.replace('{provider}', language.SuperMemory)}</span>
                 <SelectInput className="mb-4" bind:value={settings.summarizationModel}>
                     <OptionInput value="subModel">{language.submodel}</OptionInput>
                     {#if "gpu" in navigator}
@@ -1245,23 +1245,23 @@
                     <Check name={language.hypaV3Settings.doNotSummarizeUserMessageLabel} bind:check={settings.doNotSummarizeUserMessage} />
                     <Help key="hypaV3DoNotSummarizeUserMessage"/>
                 </div>
-                <Accordion name="Advanced Settings" styled>
+                <Accordion name={language.advancedSettings} styled>
                     <div class="mb-2 flex items-center">
-                        <Check name="Use Experimental Implementation" bind:check={settings.useExperimentalImpl} />
+                        <Check name={language.useExperimentalImpl} bind:check={settings.useExperimentalImpl} />
                         <Help key="hypaV3UseExperimentalImpl"/>
                     </div>
                     <div class="mb-2 flex items-center">
-                        <Check name="Always Toggle On" bind:check={settings.alwaysToggleOn} />
+                        <Check name={language.alwaysToggleOn} bind:check={settings.alwaysToggleOn} />
                         <Help key="hypaV3AlwaysToggleOn"/>
                     </div>
                     {#if settings.useExperimentalImpl}
-                        <span class="text-textcolor">Summarization Requests Per Minute <Help key="hypaV3SummarizationRequestsPerMinute"/></span>
+                        <span class="text-textcolor">{language.summarizationRequestsPerMinute} <Help key="hypaV3SummarizationRequestsPerMinute"/></span>
                         <NumberInput marginBottom size="sm" min={1} bind:value={settings.summarizationRequestsPerMinute} />
-                        <span class="text-textcolor">Summarization Max Concurrent <Help key="hypaV3SummarizationMaxConcurrent"/></span>
+                        <span class="text-textcolor">{language.summarizationMaxConcurrent} <Help key="hypaV3SummarizationMaxConcurrent"/></span>
                         <NumberInput marginBottom size="sm" min={1} max={10} bind:value={settings.summarizationMaxConcurrent} />
-                        <span class="text-textcolor">Embedding Requests Per Minute <Help key="hypaV3EmbeddingRequestsPerMinute"/></span>
+                        <span class="text-textcolor">{language.embeddingRequestsPerMinute} <Help key="hypaV3EmbeddingRequestsPerMinute"/></span>
                         <NumberInput marginBottom size="sm" min={1} bind:value={settings.embeddingRequestsPerMinute} />
-                        <span class="text-textcolor">Embedding Max Concurrent <Help key="hypaV3EmbeddingMaxConcurrent"/></span>
+                        <span class="text-textcolor">{language.embeddingMaxConcurrent} <Help key="hypaV3EmbeddingMaxConcurrent"/></span>
                         <NumberInput marginBottom size="sm" min={1} max={10} bind:value={settings.embeddingMaxConcurrent} />
                     {:else}
                         <div class="mb-2 flex items-center">
@@ -1275,21 +1275,21 @@
             <div class="mb-8"></div>
         {:else if (DBState.db.supaModelType !== 'none' && DBState.db.hypav2 === false && DBState.db.hypaV3 === false)}
             <span class="mb-2 text-textcolor2 text-sm text-wrap wrap-break-word max-w-full">{language.supaDesc}</span>
-            <span class="text-textcolor mt-4">{language.SuperMemory} {language.model}</span>
+            <span class="text-textcolor mt-4">{language.modelFor.replace('{provider}', language.SuperMemory)}</span>
             <SelectInput className="mt-2 mb-2" bind:value={DBState.db.supaModelType}>
-                <OptionInput value="distilbart" >distilbart-cnn-6-6 (Free/Local)</OptionInput>
+                <OptionInput value="distilbart" >distilbart-cnn-6-6 ({language.freeLocal})</OptionInput>
                 <OptionInput value="instruct35" >OpenAI 3.5 Turbo Instruct</OptionInput>
                 <OptionInput value="subModel" >{language.submodel}</OptionInput>
             </SelectInput>
             <span class="text-textcolor">{language.maxSupaChunkSize}</span>
             <NumberInput size="sm" marginBottom bind:value={DBState.db.maxSupaChunkSize} min={100} />
             {#if DBState.db.supaModelType === 'davinci' || DBState.db.supaModelType === 'curie' || DBState.db.supaModelType === 'instruct35'}
-                <span class="text-textcolor">{language.SuperMemory} OpenAI Key</span>
+                <span class="text-textcolor">{language.openAIKeyFor.replace('{feature}', language.SuperMemory)}</span>
                 <TextInput size="sm" marginBottom bind:value={DBState.db.supaMemoryKey}/>
             {/if}
             {#if DBState.db.supaModelType !== 'none'}
-                <span class="text-textcolor">{language.SuperMemory} Prompt</span>
-                <TextInput size="sm" marginBottom bind:value={DBState.db.supaMemoryPrompt} placeholder="Leave it blank to use default"/>
+                <span class="text-textcolor">{language.promptFor.replace('{feature}', language.SuperMemory)}</span>
+                <TextInput size="sm" marginBottom bind:value={DBState.db.supaMemoryPrompt} placeholder={language.leaveBlankForDefault}/>
             {/if}
             <div class="flex mb-4">
                 <Check bind:check={DBState.db.hypaMemory} name={language.enable + ' ' + language.HypaMemory}/>
@@ -1316,25 +1316,25 @@
             <OptionInput value="openai3large">OpenAI text-embedding-3-large</OptionInput>
             <OptionInput value="ada">OpenAI Ada</OptionInput>
             <OptionInput value="voyageContext3">Voyage Context 3</OptionInput>
-            <OptionInput value="custom">Custom (OpenAI-compatible)</OptionInput>
+            <OptionInput value="custom">{language.customOpenAICompatible}</OptionInput>
         </SelectInput>
 
         {#if DBState.db.hypaModel === 'openai3small' || DBState.db.hypaModel === 'openai3large' || DBState.db.hypaModel === 'ada'}
-            <span class="text-textcolor">OpenAI API Key</span>
+            <span class="text-textcolor">{language.apiKeyFor.replace('{provider}', 'OpenAI')}</span>
             <TextInput size="sm" marginBottom bind:value={DBState.db.supaMemoryKey}/>
         {/if}
 
         {#if DBState.db.hypaModel === 'custom'}
-            <span class="text-textcolor">URL</span>
+            <span class="text-textcolor">{language.url}</span>
             <TextInput size="sm" marginBottom bind:value={DBState.db.hypaCustomSettings.url}/>
-            <span class="text-textcolor">Key/Password</span>
+            <span class="text-textcolor">{language.keyOrPassword}</span>
             <TextInput size="sm" marginBottom bind:value={DBState.db.hypaCustomSettings.key}/>
-            <span class="text-textcolor">Request Model</span>
+            <span class="text-textcolor">{language.proxyRequestModel}</span>
             <TextInput size="sm" marginBottom bind:value={DBState.db.hypaCustomSettings.model}/>
         {/if}
 
         {#if DBState.db.hypaModel === 'voyageContext3'}
-            <span class="text-textcolor">Voyage API Key</span>
+            <span class="text-textcolor">{language.apiKeyFor.replace('{provider}', 'Voyage')}</span>
             <TextInput size="sm" marginBottom hideText={DBState.db.hideApiKey} bind:value={DBState.db.voyageApiKey}/>
         {/if}
 

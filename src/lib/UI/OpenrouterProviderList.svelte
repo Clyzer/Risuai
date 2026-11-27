@@ -39,7 +39,7 @@
                     onclick={() => {
                         openOptions = false
                     }}
-                    title="Back"
+                    title={language.back}
                 >
                     <ArrowLeft size={20} />
                 </button>

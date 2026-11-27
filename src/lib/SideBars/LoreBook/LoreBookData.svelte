@@ -89,7 +89,7 @@
         if(book.mode === 'child'){
             const value = getCurrentCharacter()?.globalLore.find(e => e.id === book.id)
             if(value){
-                return value.comment.length === 0 ? value.key.length === 0 ? "Unnamed Lore" : value.key : value.comment
+                return value.comment.length === 0 ? value.key.length === 0 ? language.unnamedLore : value.key : value.comment
             }
         }
     }
@@ -126,9 +126,9 @@
                 {/if}
             {/if}
             {#if value.mode === 'folder'}
-                <span>{value.comment.length === 0 ? "Unnamed Folder" : value.comment}</span>
+                <span>{value.comment.length === 0 ? language.unnamedFolder : value.comment}</span>
             {:else}
-                <span>{value.comment.length === 0 ? value.key.length === 0 ? "Unnamed Lore" : value.key : value.comment}</span>
+                <span>{value.comment.length === 0 ? value.key.length === 0 ? language.unnamedLore : value.key : value.comment}</span>
             {/if}
         </button>
         <button
@@ -162,7 +162,7 @@
             }
 
             if (shouldRemove) {
-                const secondConfirm = await alertConfirm(language.removeConfirm + (value.comment || 'Unnamed Folder'));
+                const secondConfirm = await alertConfirm(language.removeConfirm + (value.comment || language.unnamedFolder));
                 if (secondConfirm) {
                     if (!open) {
                         onClose();

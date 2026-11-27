@@ -147,7 +147,7 @@
             {:else}
                 <LinkIcon />
             {/if}
-            <span class="text-xs">CHAR</span>
+            <span class="text-xs">{language.loreBulkChar}</span>
         </button>
         <button onclick={() => {
             toggleChatLoreAlwaysActive()

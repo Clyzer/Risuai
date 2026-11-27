@@ -4,6 +4,7 @@
     import { DBState } from './ts/stores.svelte';
     import ChatScreen from './lib/ChatScreens/ChatScreen.svelte';
     import AlertComp from './lib/Others/AlertComp.svelte';
+    import StageAlerts from './lib/Stage/StageAlerts.svelte';
     import RealmPopUp from './lib/UI/Realm/RealmPopUp.svelte';
     import GridChars from './lib/Others/GridCatalog.svelte';
     import WelcomeRisu from './lib/Others/WelcomeRisu.svelte';
@@ -37,6 +38,7 @@
     import IrisModal from './lib/Others/IrisModal.svelte';
     import Legal from './lib/Others/Legal.svelte';
     import CustomSidebarConfig from './lib/Others/CustomSidebarConfig.svelte';
+    import StageApp from './lib/Stage/StageApp.svelte';
     import { RISU_APP_INTERNAL_DRAG_TYPE, RISU_SIDEBAR_DRAG_TYPE } from './ts/dragTypes';
     import { startAuroraArt } from './ts/gui/auroraArt';
     import { ColorSchemeTypeStore } from './ts/gui/colorscheme';
@@ -240,6 +242,8 @@
         <WelcomeRisu />
     {:else if $settingsOpen}
         <Settings />
+    {:else if DBState.db.theme === 'stage'}
+        <StageApp />
     {:else if $MobileGUI}
         <div class="w-full h-full flex flex-col">
             <MobileHeader />
@@ -266,6 +270,9 @@
     {/if}
     {#if $alertStore.type !== 'none'}
         <AlertComp />
+    {/if}
+    {#if DBState.db.theme === 'stage'}
+        <StageAlerts />
     {/if}
     {#if $showRealmInfoStore}
         <RealmPopUp bind:openedData={$showRealmInfoStore} />

@@ -29,7 +29,8 @@
     ],
     "start_url": "/",
     "display": "standalone",
-    "theme_color": "#4682B4",
+    "theme_color": "#21222c",
+    "background_color": "#21222c",
     "share_target": {
         "action": "/receive-files/",
         "method": "POST",

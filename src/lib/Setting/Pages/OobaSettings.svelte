@@ -17,36 +17,36 @@
     let { instructionMode = false }: Props = $props();
 </script>
 
-<Accordion name="Ooba Settings" styled>
+<Accordion name={language.oobaSettings} styled>
     {#if instructionMode}
         <ChatFormatSettings />
     {:else}
-        <span class="text-textcolor">Ooba Mode</span>
+        <span class="text-textcolor">{language.oobaMode}</span>
         <SelectInput className="mt-2 mb-4" bind:value={DBState.db.reverseProxyOobaArgs.mode}>
-            <OptionInput value="instruct">Instruct</OptionInput>
-            <OptionInput value="chat">Chat</OptionInput>
-            <OptionInput value="chat-instruct">Chat-Instruct</OptionInput>
+            <OptionInput value="instruct">{language.oobaModeInstruct}</OptionInput>
+            <OptionInput value="chat">{language.Chat}</OptionInput>
+            <OptionInput value="chat-instruct">{language.oobaModeChatInstruct}</OptionInput>
         </SelectInput>
         <!-- name1 = user | name2 = bot --->
 
         {#if DBState.db.reverseProxyOobaArgs.mode === 'instruct'}
-            <span class="text-textcolor">user prefix</span>
+            <span class="text-textcolor">{language.oobaUserPrefix}</span>
             <OptionalInput marginBottom={true} bind:value={DBState.db.reverseProxyOobaArgs.name1_instruct} />
-            <span class="text-textcolor">bot prefix</span>
+            <span class="text-textcolor">{language.oobaBotPrefix}</span>
             <OptionalInput marginBottom={true} bind:value={DBState.db.reverseProxyOobaArgs.name2_instruct} />
-            <span class="text-textcolor">system prefix</span>
+            <span class="text-textcolor">{language.oobaSystemPrefix}</span>
             <OptionalInput marginBottom={true} bind:value={DBState.db.reverseProxyOobaArgs.context_instruct} />
-            <span class="text-textcolor">system message</span>
+            <span class="text-textcolor">{language.oobaSystemMessage}</span>
             <OptionalInput marginBottom={true} bind:value={DBState.db.reverseProxyOobaArgs.system_message} />
         {/if}
         {#if DBState.db.reverseProxyOobaArgs.mode === 'chat' || DBState.db.reverseProxyOobaArgs.mode === 'chat-instruct'}
-            <span class="text-textcolor">user prefix</span>
+            <span class="text-textcolor">{language.oobaUserPrefix}</span>
             <OptionalInput marginBottom={true} bind:value={DBState.db.reverseProxyOobaArgs.name1} />
-            <span class="text-textcolor">bot prefix</span>
+            <span class="text-textcolor">{language.oobaBotPrefix}</span>
             <OptionalInput marginBottom={true} bind:value={DBState.db.reverseProxyOobaArgs.name2} />
-            <span class="text-textcolor">system prefix</span>
+            <span class="text-textcolor">{language.oobaSystemPrefix}</span>
             <OptionalInput marginBottom={true} bind:value={DBState.db.reverseProxyOobaArgs.context} />
-            <span class="text-textcolor">start message</span>
+            <span class="text-textcolor">{language.oobaStartMessage}</span>
             <OptionalInput marginBottom={true} bind:value={DBState.db.reverseProxyOobaArgs.greeting} />
         {/if}
         {#if DBState.db.reverseProxyOobaArgs.mode === 'chat-instruct'}

@@ -27,7 +27,7 @@
   
 <h2 class="text-4xl text-textcolor my-6 font-black relative">{language.embedding}</h2>
 
-<span class="text-textcolor text-lg">Model</span>
+<span class="text-textcolor text-lg">{language.model}</span>
 <SelectInput bind:value={model} className="mb-4">
     {#if 'gpu' in navigator}
         <OptionInput value="MiniLMGPU">MiniLM L6 v2 (GPU)</OptionInput>
@@ -46,29 +46,29 @@
     <OptionInput value="openai3small">OpenAI text-embedding-3-small</OptionInput>
     <OptionInput value="openai3large">OpenAI text-embedding-3-large</OptionInput>
     <OptionInput value="ada">OpenAI Ada</OptionInput>
-    <OptionInput value="custom">Custom (OpenAI-compatible)</OptionInput>
+    <OptionInput value="custom">{language.customOpenAICompatible}</OptionInput>
 </SelectInput>
 
 {#if model === 'openai3small' || model === 'openai3large' || model === 'ada'}
-    <span class="text-textcolor text-lg">OpenAI API Key</span>
+    <span class="text-textcolor text-lg">{language.openAIApiKey}</span>
     <TextInput size="sm" marginBottom bind:value={DBState.db.supaMemoryKey}/>
 {/if}
 
 {#if model === "custom"}
-    <span class="text-textcolor text-lg">URL</span>
+    <span class="text-textcolor text-lg">{language.url}</span>
     <TextInput size="sm" marginBottom bind:value={DBState.db.hypaCustomSettings.url}/>
-    <span class="text-textcolor text-lg">Key/Password</span>
+    <span class="text-textcolor text-lg">{language.keyPassword}</span>
     <TextInput size="sm" marginBottom bind:value={DBState.db.hypaCustomSettings.key}/>
-    <span class="text-textcolor text-lg">Request Model</span>
+    <span class="text-textcolor text-lg">{language.proxyRequestModel}</span>
     <TextInput size="sm" marginBottom bind:value={DBState.db.hypaCustomSettings.model}/>
 {/if}
 
 <div class="mb-4"></div>
 
-<span class="text-textcolor text-lg">Query</span>
+<span class="text-textcolor text-lg">{language.query}</span>
 <TextInput bind:value={query} size="lg" fullwidth />
 
-<span class="text-textcolor text-lg mt-6">Data</span>
+<span class="text-textcolor text-lg mt-6">{language.data}</span>
 {#each data as item, i}
     <TextInput bind:value={data[i]} size="lg" fullwidth marginBottom />
 {/each}
@@ -77,9 +77,9 @@
     data = data
 }}>+</Button>
 
-<span class="text-textcolor text-lg mt-6">Result</span>
+<span class="text-textcolor text-lg mt-6">{language.result}</span>
 {#if dataresult.length === 0}
-    <span class="text-textcolor2 text-lg">No result</span>
+    <span class="text-textcolor2 text-lg">{language.noResult}</span>
 {/if}
 {#each dataresult as [item, score]}
     <div class="flex justify-between">

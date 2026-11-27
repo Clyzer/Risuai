@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { language } from "src/lang";
     import { Template } from '@huggingface/jinja';
     import TextAreaInput from "../UI/GUI/TextAreaInput.svelte";
     let input = $state("");
@@ -33,10 +34,10 @@
 
 <TextAreaInput onInput={onInput} bind:value={input} />
 
-<span class="text-textcolor text-lg">Data (JSON)</span>
+<span class="text-textcolor text-lg">{language.dataJson}</span>
 
 <TextAreaInput onInput={onInput} bind:value={json} />
 
-<span class="text-textcolor text-lg">Result</span>
+<span class="text-textcolor text-lg">{language.result}</span>
 
 <TextAreaInput value={output} />

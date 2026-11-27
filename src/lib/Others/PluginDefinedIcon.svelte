@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { language } from "src/lang";
     import DOMPurify from 'dompurify';
 
     let {
@@ -46,6 +47,6 @@
     {#if ico.iconType === 'html'}
         {@html iconPurify(ico.icon)}
     {:else if ico.iconType === 'img'}
-        <img src={isSafeSchema(ico.icon)} alt="icon" />
+        <img src={isSafeSchema(ico.icon)} alt={language.icon} />
     {/if}
 </div>
