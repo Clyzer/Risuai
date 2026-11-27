@@ -1515,5 +1515,7 @@ export const languageSpanish = {
         neverPlayed: "Sin jugar todavía",
         playthroughCount: "{} partidas",
         themeStage: "Stage",
+        insecureTitle: "Conexión no segura",
+        insecureBody: "Esta dirección no es HTTPS, así que el navegador bloquea funciones que Risu necesita para importar tarjetas y guardar imágenes. Abre Risu con HTTPS, o desde localhost en esta computadora.",
     },
 } satisfies DeepPartial<typeof import('./en').languageEnglish>;

@@ -11,6 +11,12 @@
     import StageChats from './StageChats.svelte'
     import StageYou from './StageYou.svelte'
     import { stageNav } from './stageNav.svelte'
+    import { language } from 'src/lang'
+
+    // Over plain HTTP on a LAN address the browser hides crypto.subtle, randomUUID and OPFS,
+    // and importing fails without any message. Say so instead of failing silently.
+    const insecure = typeof window !== 'undefined' && !window.isSecureContext
+    let insecureDismissed = $state(false)
 
     // "Import from Realm" in Risu's add-character dialog asks the app to show Realm.
     $effect(() => {
@@ -31,6 +37,15 @@
         </div>
     {:else}
         <div class="stage-shell">
+            {#if insecure && !insecureDismissed}
+                <div class="stage-insecure" role="alert">
+                    <div>
+                        <b>{language.stage.insecureTitle}</b>
+                        <span>{language.stage.insecureBody}</span>
+                    </div>
+                    <button aria-label={language.close} onclick={() => (insecureDismissed = true)}>✕</button>
+                </div>
+            {/if}
             <div class="stage-page">
                 {#if stageNav.tab === 'home'}
                     <StageHome />
@@ -84,6 +99,35 @@
             border-left: 1px solid var(--stage-line);
             border-right: 1px solid var(--stage-line);
         }
+    }
+    .stage-insecure {
+        flex: none;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        margin: calc(10px + env(safe-area-inset-top, 0px)) 12px 0;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: color-mix(in oklab, #ffb84d 14%, var(--stage-bg));
+        color: color-mix(in oklab, #ffcf85 85%, var(--risu-theme-textcolor));
+        font-size: 13px;
+        line-height: 1.45;
+    }
+    .stage-insecure div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+        min-width: 0;
+    }
+    .stage-insecure b {
+        font-size: 14px;
+    }
+    .stage-insecure button {
+        flex: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
     }
     .stage-page {
         position: relative;

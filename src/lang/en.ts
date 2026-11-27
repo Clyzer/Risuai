@@ -1790,6 +1790,8 @@ export const languageEnglish = {
         neverPlayed: "Not played yet",
         playthroughCount: "{} playthroughs",
         themeStage: "Stage",
+        insecureTitle: "Insecure connection",
+        insecureBody: "This address is not HTTPS, so the browser blocks features Risu needs to import cards and save images. Open Risu over HTTPS, or from localhost on this computer.",
     },
 } satisfies I18nTranslation;
 
