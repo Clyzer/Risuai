@@ -10,6 +10,7 @@
     import StageYou from './StageYou.svelte'
     import StageStoryDetail from './StageStoryDetail.svelte'
     import StageStartPicker from './StageStartPicker.svelte'
+    import StageImportReview from './StageImportReview.svelte'
     import { stageNav } from './stageNav.svelte'
     import { language } from 'src/lang'
 
@@ -67,6 +68,10 @@
 <div class="stage-root">
     {#if $selectedCharID >= 0}
         <StagePlay />
+    {:else if stageNav.importReview}
+        <div class="stage-shell">
+            <StageImportReview />
+        </div>
     {:else if stageNav.startPicker !== null && DBState.db.characters[stageNav.startPicker]}
         <div class="stage-shell">
             <StageStartPicker index={stageNav.startPicker} />

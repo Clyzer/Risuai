@@ -5,6 +5,8 @@
     import {
         BlocksIcon,
         BookOpenIcon,
+        BracesIcon,
+        GaugeIcon,
         ChevronRightIcon,
         InfoIcon,
         ListIcon,
@@ -15,6 +17,7 @@
     } from '@lucide/svelte'
     import { language } from 'src/lang'
     import { DBState, ScrollToMessageStore, selectedCharID, SettingsMenuIndex, settingsOpen, CharConfigSubMenu } from 'src/ts/stores.svelte'
+    import { getIndicators, listVariables } from './stageIndicators'
 
     interface Props {
         close: () => void
@@ -23,9 +26,11 @@
         openChatList: () => void
         openModuleList: () => void
         openEditor: () => void
+        openIndicators: () => void
+        openVariables: () => void
     }
 
-    let { close, exit, openStoryPage, openChatList, openModuleList, openEditor }: Props = $props()
+    let { close, exit, openStoryPage, openChatList, openModuleList, openEditor, openIndicators, openVariables }: Props = $props()
 
     let char = $derived(DBState.db.characters[$selectedCharID])
     let chat = $derived(char?.chats?.[char.chatPage])
@@ -82,6 +87,14 @@
         <button class="stage-drawer-row" onclick={openLorebook}>
             <BookOpenIcon size={22} /><span>{language.loreBook}</span>
             <em>{char?.globalLore?.length ?? 0}</em><ChevronRightIcon size={18} />
+        </button>
+        <button class="stage-drawer-row" onclick={openIndicators}>
+            <GaugeIcon size={22} /><span>{language.stage.indicators}</span>
+            <em>{getIndicators(char).length || language.stage.none}</em><ChevronRightIcon size={18} />
+        </button>
+        <button class="stage-drawer-row" onclick={openVariables}>
+            <BracesIcon size={22} /><span>{language.stage.variables}</span>
+            <em>{listVariables(char, chat).length}</em><ChevronRightIcon size={18} />
         </button>
         <button class="stage-drawer-row" onclick={() => openSettings(1)}>
             <SparklesIcon size={22} /><span>{language.stage.aiModel}</span>

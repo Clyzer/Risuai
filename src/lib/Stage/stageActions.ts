@@ -2,9 +2,13 @@
 // functions (readModule, the same new-chat shape SideChatList creates, changeChar).
 import { v4 } from 'uuid'
 import { language } from 'src/lang'
-import { alertError, alertNormal, alertWait } from 'src/ts/alert'
+import { alertClear, alertError, alertNormal, alertWait } from 'src/ts/alert'
 import { changeChar, createNewCharacter, createNewGroup } from 'src/ts/characters'
-import { importCharacter } from 'src/ts/characterCards'
+import { importCharacterProcess } from 'src/ts/characterCards'
+import { importPreset } from 'src/ts/storage/database.svelte'
+import { checkCharOrder } from 'src/ts/globalApi.svelte'
+import { previewCard, routeOf } from './stageImportPreview'
+import { setStageKind, type StageKind } from './stageKinds'
 import { alertAddCharacter } from 'src/ts/alert'
 import { stageNav } from './stageNav.svelte'
 import { readModule } from 'src/ts/process/modules'
@@ -124,7 +128,7 @@ export async function addFromStage() {
             stageNav.tab = 'realm'
             return
         case 'importCharacter':
-            await importCharacter()
+            await pickAndReview()
             return
         case 'createfromScratch':
             createNewCharacter()
@@ -138,4 +142,73 @@ export async function addFromStage() {
     if (DBState.db.characters.length > before) {
         changeChar(DBState.db.characters.length - 1)
     }
+}
+
+/**
+ * Stage import: pick one file and, for character cards, read it and show the review page before
+ * anything is saved. Several files at once, or a card that cannot be read, use Risu's own import.
+ */
+export async function pickAndReview() {
+    const files = await selectFileByDom(['*'], 'multiple')
+    if (!files || files.length === 0) return
+    if (files.length > 1) {
+        for (const file of files) await importAnyFile(file)
+        return
+    }
+    const file = files[0]
+    if (routeOf(file.name) !== 'character') {
+        await importAnyFile(file)
+        return
+    }
+    alertWait(language.stage.reading)
+    const preview = await previewCard(file)
+    alertClear()
+    if (!preview) {
+        await importAnyFile(file)
+        return
+    }
+    stageNav.importReview = { file, preview }
+}
+
+/** Imports one file the way Risu's drop handler does (presets, modules or characters). */
+export async function importAnyFile(file: File) {
+    const route = routeOf(file.name)
+    if (route === 'preset') {
+        await importPreset({ name: file.name, data: new Uint8Array(await file.arrayBuffer()) })
+        alertNormal(language.successImport)
+        return
+    }
+    if (route === 'module') {
+        const module = await readModule(Buffer.from(await file.arrayBuffer()))
+        if (module) {
+            DBState.db.modules.push(module)
+            alertNormal(language.successImport)
+        }
+        return
+    }
+    await importCharacterProcess({ name: file.name, data: file })
+    checkCharOrder()
+}
+
+/** Confirms the review: Risu's import, then the choices made on the review page. */
+export async function confirmImport(kind: StageKind, linkModuleIds: string[]) {
+    const review = stageNav.importReview
+    if (!review) return
+    const before = DBState.db.characters.length
+    closeReview()
+    await importCharacterProcess({ name: review.file.name, data: review.file })
+    checkCharOrder()
+    const after = DBState.db.characters.length
+    if (after <= before) return
+    const index = after - 1
+    const char = DBState.db.characters[index]
+    setStageKind(char, kind)
+    for (const id of linkModuleIds) linkModule(index, id)
+    stageNav.detail = index
+}
+
+export function closeReview() {
+    const review = stageNav.importReview
+    if (review?.preview.coverUrl) URL.revokeObjectURL(review.preview.coverUrl)
+    stageNav.importReview = null
 }

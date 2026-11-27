@@ -53,12 +53,14 @@ export function storyRequirements(
     const missingLinked = linkedIds.filter((id) => !byId.has(id))
     const global = enabledModules.filter((id) => byId.has(id)).map((id) => info(byId.get(id)))
 
-    const storyName = normalize(char.name)
+    // Match the module name against the story name, with and without bracketed parts, so that
+    // "Argenta Academy (ES)" still finds "🏰 Argenta Academy (아르젠타 아카데미) · Assets".
+    const names = [normalize(char.name), normalize((char.name ?? '').replace(/[([{][^)\]}]*[)\]}]/g, ' '))].filter((n) => n.length >= 3)
     const suggested =
-        storyName.length >= 3
+        names.length > 0
             ? modules
                   .filter((m) => !linkedIds.includes(m.id) && !enabledModules.includes(m.id))
-                  .filter((m) => normalize(m.name).includes(storyName))
+                  .filter((m) => names.some((n) => normalize(m.name).includes(n)))
                   .map(info)
             : []
 

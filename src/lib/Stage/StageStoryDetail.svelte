@@ -28,6 +28,7 @@
     import { changeChar } from 'src/ts/characters'
     import { startMode } from './stageStarts'
     import { isKindOverridden, setStageKind, stageKind } from './stageKinds'
+    import { storySummary } from './stageAbout'
 
     interface Props {
         index: number
@@ -45,6 +46,7 @@
     let kind = $derived(char ? stageKind(char) : 'story')
     let kindOverridden = $derived(char ? isKindOverridden(char) : false)
     // Notes written in one language get no language tabs (MultiLangDisplay would show "Unknown Language").
+    let summary = $derived(char ? storySummary(char, DBState.db.language) : '')
     let multiLangNotes = $derived(Object.keys(parseMultilangString(char?.creatorNotes ?? '')).some((k) => k !== 'xx'))
     let greetingCount = $derived(1 + (char?.alternateGreetings ?? []).filter((g) => g?.trim()).length)
 
@@ -82,6 +84,15 @@
             </div>
 
             <div class="stage-detail-body">
+                {#if summary}
+                    <section class="stage-about" aria-label={language.stage.about}>
+                        <div class="stage-section-title">{language.stage.about}</div>
+                        {#each summary.split('\n\n') as paragraph}
+                            <p>{paragraph}</p>
+                        {/each}
+                    </section>
+                {/if}
+
                 <div class="stage-facts">
                     <div><b>{playthroughs.length}</b><span>{language.stage.playthroughs.toLocaleLowerCase()}</span></div>
                     <div><b>{char.globalLore?.length ?? 0}</b><span>{language.stage.loreEntries}</span></div>
@@ -215,7 +226,8 @@
                 {/if}
 
                 {#if char.creatorNotes}
-                    <div class="stage-section-title">{language.stage.about}</div>
+                    <details class="stage-notes-fold">
+                        <summary>{language.stage.creatorNotes}</summary>
                     <div class="stage-notes">
                         {#if multiLangNotes}
                             <MultiLangDisplay value={char.creatorNotes} markdown={true} />
@@ -227,6 +239,7 @@
                             </div>
                         {/if}
                     </div>
+                    </details>
                 {/if}
             </div>
         </div>
@@ -476,6 +489,38 @@
     }
     .stage-pt-text small {
         font-size: 13px;
+    }
+    .stage-about p {
+        margin: 0 0 10px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: color-mix(in oklab, var(--risu-theme-textcolor) 92%, transparent);
+        text-wrap: pretty;
+    }
+    .stage-notes-fold {
+        margin-top: 22px;
+        border-top: 1px solid var(--stage-line);
+    }
+    .stage-notes-fold > summary {
+        display: flex;
+        align-items: center;
+        min-height: 52px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--stage-muted);
+        cursor: pointer;
+        list-style: none;
+    }
+    .stage-notes-fold > summary::-webkit-details-marker {
+        display: none;
+    }
+    .stage-notes-fold > summary::after {
+        content: '▾';
+        margin-left: auto;
+        transition: transform 0.2s;
+    }
+    .stage-notes-fold[open] > summary::after {
+        transform: rotate(180deg);
     }
     .stage-notes {
         font-size: 14px;

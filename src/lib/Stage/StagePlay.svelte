@@ -16,6 +16,10 @@
     import ModuleChatMenu from '../Setting/Pages/Module/ModuleChatMenu.svelte'
     import StagePlayDrawer from './StagePlayDrawer.svelte'
     import StageCharacterEditor from './StageCharacterEditor.svelte'
+    import StageIndicatorsHud from './StageIndicatorsHud.svelte'
+    import StageIndicatorsPage from './StageIndicatorsPage.svelte'
+    import StageVariablesPage from './StageVariablesPage.svelte'
+    import { getIndicators } from './stageIndicators'
     import { stageNav } from './stageNav.svelte'
     import { stageKind } from './stageKinds'
     import { applyStep, buildSteps, clearMarks, isInteractiveTarget, readMode, saveMode, type DramaStep } from './stageDrama'
@@ -24,10 +28,13 @@
     let openModuleList = $state(false)
     let drawerOpen = $state(false)
     let editorOpen = $state(false)
+    let indicatorsOpen = $state(false)
+    let variablesOpen = $state(false)
     let barHidden = $state(false)
 
     let char = $derived(DBState.db.characters[$selectedCharID])
     let chat = $derived(char?.chats?.[char.chatPage])
+    let indicators = $derived(getIndicators(char))
 
     // ---- Novel / Drama ----
     let mode = $state<'novel' | 'drama'>('novel')
@@ -174,7 +181,7 @@
 {#if char}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="stage-play" class:drama={mode === 'drama'} bind:this={playEl} onscrollcapture={onScroll}>
+    <div class="stage-play" class:drama={mode === 'drama'} bind:this={playEl} onscrollcapture={onScroll} style:--stage-top-space={indicators.length > 0 ? '100px' : '56px'}>
         <div class="stage-play-bg"><BackgroundDom /></div>
         <div class="stage-play-chat" onclick={onStageTap}>
             <DefaultChatScreen bind:openChatList bind:openModuleList />
@@ -205,6 +212,10 @@
             </button>
         </header>
 
+        {#if indicators.length > 0}
+            <StageIndicatorsHud {indicators} {char} {chat} hidden={barHidden} />
+        {/if}
+
         {#if drawerOpen}
             <StagePlayDrawer
                 close={() => (drawerOpen = false)}
@@ -222,11 +233,25 @@
                     drawerOpen = false
                     editorOpen = true
                 }}
+                openIndicators={() => {
+                    drawerOpen = false
+                    indicatorsOpen = true
+                }}
+                openVariables={() => {
+                    drawerOpen = false
+                    variablesOpen = true
+                }}
             />
         {/if}
 
         {#if editorOpen}
             <StageCharacterEditor close={() => (editorOpen = false)} />
+        {/if}
+        {#if indicatorsOpen}
+            <StageIndicatorsPage close={() => (indicatorsOpen = false)} />
+        {/if}
+        {#if variablesOpen}
+            <StageVariablesPage close={() => (variablesOpen = false)} />
         {/if}
     </div>
 
@@ -266,7 +291,7 @@
     }
     /* Room for the floating top bar above the oldest message. */
     .stage-play :global(.default-chat-screen) {
-        padding-top: calc(56px + env(safe-area-inset-top, 0px));
+        padding-top: calc(var(--stage-top-space, 56px) + env(safe-area-inset-top, 0px));
     }
     /* Messages (Chat.svelte's "stage" branch): the card's content gets the full width. */
     .stage-play :global(.risu-chat > div) {
