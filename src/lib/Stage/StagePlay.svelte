@@ -356,6 +356,55 @@
         margin: 0;
         padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
         background: linear-gradient(color-mix(in oklab, var(--stage-bg) 0%, transparent), var(--stage-bg) 35%);
+        align-items: flex-end;
+        gap: 6px;
+        padding-left: 6px;
+        padding-right: 8px;
+    }
+    /* Input bar like a messaging app: the chat actions (⋯) on the left, apart from Send; the text
+       field as a pill; Send (and Stop while the reply is written) as the accent circle. */
+    .stage-play :global(.risu-chat-input-bar > .risu-chat-options-btn) {
+        order: -1;
+        flex: none;
+        width: 44px;
+        height: 44px !important;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--stage-muted);
+    }
+    /* Risu's chat actions menu opens above the ⋯ button, as a raised sheet. */
+    .stage-play :global(.risu-chat-input-bar .risu-chat-menu) {
+        left: 8px;
+        right: auto;
+        bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+        padding: 14px 18px;
+        border-radius: 16px;
+        background: var(--stage-raised);
+        border: 1px solid var(--stage-line);
+        box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+    }
+    .stage-play :global(.risu-chat-input-bar > textarea.text-input-area) {
+        min-height: 44px;
+        margin: 0;
+        padding: 10px 16px;
+        border: 1px solid var(--stage-line);
+        border-radius: 22px;
+        background: var(--stage-surface);
+        font-size: 16px;
+        line-height: 1.4;
+    }
+    .stage-play :global(.risu-chat-input-bar > button:not(.risu-chat-options-btn)) {
+        flex: none;
+        width: 44px;
+        height: 44px !important;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: var(--stage-accent);
+        color: #fff;
     }
     /* The top bar floats over the chat; it may move with transform because it does not wrap messages. */
     .stage-play-top {

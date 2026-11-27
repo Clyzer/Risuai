@@ -69,6 +69,10 @@
         if (viewport && !viewport.content.includes('viewport-fit')) {
             viewport.content = `${viewport.content}, viewport-fit=cover`
         }
+        // The on-screen keyboard shrinks the page instead of covering it, so the input stays above it.
+        if (viewport && !viewport.content.includes('interactive-widget')) {
+            viewport.content = `${viewport.content}, interactive-widget=resizes-content`
+        }
         document.documentElement.classList.add('risu-stage-edge')
     })
 
