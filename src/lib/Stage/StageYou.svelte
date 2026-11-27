@@ -14,37 +14,51 @@
     import { language } from 'src/lang'
     import { DBState, SettingsMenuIndex, settingsOpen } from 'src/ts/stores.svelte'
     import StageCover from './StageCover.svelte'
+    import StagePersonaPage from './StagePersonaPage.svelte'
+    import StageModelPage from './StageModelPage.svelte'
+    import StageOtherModelsPage from './StageOtherModelsPage.svelte'
+    import StageModuleManagerPage from './StageModuleManagerPage.svelte'
+    import StagePluginsPage from './StagePluginsPage.svelte'
+    import StageSettingsPage from './StageSettingsPage.svelte'
+    import { getModelInfo } from 'src/ts/model/modellist'
+    import { displayOtherSettingsItems, displaySizeSettingsItems, displayThemeSettingsItems } from 'src/ts/setting/displaySettingsData.svelte'
+    import { languageSettingsItems } from 'src/ts/setting/languageSettingsData.svelte'
+    import { accessibilitySettingsItems } from 'src/ts/setting/accessibilitySettingsData'
+    import { advancedSettingsItems } from 'src/ts/setting/advancedSettingsData'
 
-    // Each row opens the settings page Risu already has (index = SettingsMenuIndex).
-    type Row = { icon: typeof BotIcon; label: () => string; index: number; value?: () => string }
+    // Each row opens Stage's own page. Account (Risu login and sync) stays Risu's page.
+    type YouPage = 'persona' | 'model' | 'otherModels' | 'modules' | 'plugins' | 'display' | 'language' | 'accessibility' | 'advanced'
+    let page = $state<YouPage | null>(null)
+
+    type Row = { icon: typeof BotIcon; label: () => string; open: () => void; value?: () => string }
     const groups: { title: () => string; rows: Row[] }[] = [
         {
             title: () => language.stage.groupAi,
             rows: [
-                { icon: BotIcon, label: () => language.chatBot, index: 1 },
-                { icon: CpuIcon, label: () => language.otherBots, index: 2 },
+                { icon: BotIcon, label: () => language.stage.aiModel, open: () => (page = 'model'), value: () => getModelInfo(DBState.db.aiModel)?.shortName ?? getModelInfo(DBState.db.aiModel)?.name ?? '' },
+                { icon: CpuIcon, label: () => language.otherBots, open: () => (page = 'otherModels') },
             ],
         },
         {
             title: () => language.stage.groupContent,
             rows: [
-                { icon: BlocksIcon, label: () => language.modules, index: 14, value: () => String(DBState.db.modules?.length ?? 0) },
-                { icon: PuzzleIcon, label: () => language.plugin, index: 4 },
+                { icon: BlocksIcon, label: () => language.modules, open: () => (page = 'modules'), value: () => String(DBState.db.modules?.length ?? 0) },
+                { icon: PuzzleIcon, label: () => language.plugin, open: () => (page = 'plugins'), value: () => String(DBState.db.plugins?.length ?? 0) },
             ],
         },
         {
             title: () => language.stage.groupLook,
             rows: [
-                { icon: MonitorIcon, label: () => language.display, index: 3, value: () => language.stage.themeStage },
-                { icon: GlobeIcon, label: () => language.language, index: 10 },
-                { icon: AccessibilityIcon, label: () => language.accessibility, index: 11 },
+                { icon: MonitorIcon, label: () => language.display, open: () => (page = 'display'), value: () => language.stage.themeStage },
+                { icon: GlobeIcon, label: () => language.language, open: () => (page = 'language') },
+                { icon: AccessibilityIcon, label: () => language.accessibility, open: () => (page = 'accessibility') },
             ],
         },
         {
             title: () => language.stage.groupData,
             rows: [
-                { icon: CloudIcon, label: () => language.account, index: 0 },
-                { icon: SlidersHorizontalIcon, label: () => language.advancedSettings, index: 77 },
+                { icon: CloudIcon, label: () => language.account, open: () => openSettings(0) },
+                { icon: SlidersHorizontalIcon, label: () => language.advancedSettings, open: () => (page = 'advanced') },
             ],
         },
     ]
@@ -60,7 +74,7 @@
         <h1>{language.stage.you}</h1>
     </header>
 
-    <button class="stage-profile" onclick={() => openSettings(12)}>
+    <button class="stage-profile" onclick={() => (page = 'persona')}>
         <span class="stage-profile-img"><StageCover image={DBState.db.userIcon} /></span>
         <span class="stage-profile-text">
             <b>{DBState.db.username || language.persona}</b>
@@ -74,7 +88,7 @@
         <div class="stage-group-title">{group.title()}</div>
         {#each group.rows as row}
             {@const Icon = row.icon}
-            <button class="stage-row" onclick={() => openSettings(row.index)}>
+            <button class="stage-row" onclick={row.open}>
                 <Icon size={22} />
                 <span class="stage-row-label">{row.label()}</span>
                 {#if row.value}<span class="stage-row-value">{row.value()}</span>{/if}
@@ -83,6 +97,34 @@
         {/each}
     {/each}
 </div>
+
+{#if page === 'persona'}
+    <StagePersonaPage close={() => (page = null)} />
+{:else if page === 'model'}
+    <StageModelPage close={() => (page = null)} />
+{:else if page === 'otherModels'}
+    <StageOtherModelsPage close={() => (page = null)} />
+{:else if page === 'modules'}
+    <StageModuleManagerPage close={() => (page = null)} />
+{:else if page === 'plugins'}
+    <StagePluginsPage close={() => (page = null)} />
+{:else if page === 'display'}
+    <StageSettingsPage
+        title={language.display}
+        sections={[
+            { title: language.theme, items: displayThemeSettingsItems },
+            { title: language.sizeAndSpeed, items: displaySizeSettingsItems },
+            { title: language.others, items: displayOtherSettingsItems },
+        ]}
+        close={() => (page = null)}
+    />
+{:else if page === 'language'}
+    <StageSettingsPage title={language.language} sections={[{ title: language.language, items: languageSettingsItems }]} close={() => (page = null)} />
+{:else if page === 'accessibility'}
+    <StageSettingsPage title={language.accessibility} sections={[{ title: language.accessibility, items: accessibilitySettingsItems }]} close={() => (page = null)} />
+{:else if page === 'advanced'}
+    <StageSettingsPage title={language.advancedSettings} sections={[{ title: language.advancedSettings, items: advancedSettingsItems }]} searchable close={() => (page = null)} />
+{/if}
 
 <style>
     .stage-profile {

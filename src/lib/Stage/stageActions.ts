@@ -11,7 +11,7 @@ import { previewCard, routeOf } from './stageImportPreview'
 import { setStageKind, type StageKind } from './stageKinds'
 import { alertAddCharacter } from 'src/ts/alert'
 import { stageNav } from './stageNav.svelte'
-import { readModule } from 'src/ts/process/modules'
+import { readModule, type RisuModule } from 'src/ts/process/modules'
 import { DBState } from 'src/ts/stores.svelte'
 import { findCharacterbyId, selectFileByDom } from 'src/ts/util'
 import type { Chat } from 'src/ts/storage/database.svelte'
@@ -36,28 +36,37 @@ export function unlinkMissingModules(charIndex: number, missingIds: string[]) {
 }
 
 /**
- * Imports a .risum module and links it to the story. The picker accepts any file on purpose:
- * Android hides files with extensions it does not know (like .risum) when the picker filters.
+ * Picks a .risum file and installs it with Risu's readModule. The picker accepts any file on
+ * purpose: Android hides files with extensions it does not know (like .risum) when it filters.
  */
-export async function importModuleForStory(charIndex: number) {
+export async function importModuleFile(): Promise<RisuModule | null> {
     const files = await selectFileByDom(['*'], 'single')
     const file = files?.[0]
-    if (!file) return
+    if (!file) return null
     if (!file.name.toLowerCase().endsWith('.risum')) {
         alertError(language.stage.moduleWrongFile)
-        return
+        return null
     }
     alertWait(language.stage.moduleImporting)
     try {
         const module = await readModule(Buffer.from(await file.arrayBuffer()))
-        if (!module) return // readModule already told the user what went wrong
+        if (!module) return null // readModule already told the user what went wrong
         DBState.db.modules.push(module)
-        linkModule(charIndex, module.id)
-        alertNormal(language.stage.moduleLinked.replace('{}', module.name))
+        alertClear()
+        return module
     } catch (error) {
         console.error(error)
         alertError(language.errors.noData)
+        return null
     }
+}
+
+/** Imports a module and links it to the story. */
+export async function importModuleForStory(charIndex: number) {
+    const module = await importModuleFile()
+    if (!module) return
+    linkModule(charIndex, module.id)
+    alertNormal(language.stage.moduleLinked.replace('{}', module.name))
 }
 
 /**
