@@ -3,7 +3,7 @@
     // the functions Risu already exposes; chat processing and storage are untouched.
     import { DBState, OpenRealmStore, selectedCharID } from 'src/ts/stores.svelte'
     import StagePlay from './StagePlay.svelte'
-    import RealmMain from '../UI/Realm/RealmMain.svelte'
+    import StageRealm from './StageRealm.svelte'
     import StageTabBar from './StageTabBar.svelte'
     import StageHome from './StageHome.svelte'
     import StageChats from './StageChats.svelte'
@@ -146,7 +146,7 @@
                 {:else if stageNav.tab === 'chats'}
                     <StageChats />
                 {:else if stageNav.tab === 'realm'}
-                    <div class="stage-realm"><RealmMain /></div>
+                    <StageRealm />
                 {:else}
                     <StageYou />
                 {/if}
@@ -223,11 +223,6 @@
         position: relative;
         flex: 1;
         min-height: 0;
-    }
-    .stage-realm {
-        height: 100%;
-        overflow-y: auto;
-        padding-top: env(safe-area-inset-top, 0px);
     }
     /* Risu's own screens shown while Stage is the theme (settings, first-run setup) keep clear of
        the system bars. Stage's screens pad themselves. */
