@@ -25,6 +25,7 @@ export const displayThemeSettingsItems: SettingItem[] = [
                 { value: 'mobilechat', label: 'Mobile Chat' },
                 { value: 'cardboard', label: 'CardBoard' },
                 { value: 'aurora', label: 'Aurora' },
+                { value: 'stage', label: 'Stage' },
                 { value: 'customHTML', label: 'Custom HTML' },
             ],
         },

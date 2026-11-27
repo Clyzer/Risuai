@@ -1,0 +1,165 @@
+<script lang="ts">
+    // Stage theme shell: a phone-first launcher around Risu. It only reads the database and calls
+    // the functions Risu already exposes; chat processing and storage are untouched.
+    import { OpenRealmStore, selectedCharID } from 'src/ts/stores.svelte'
+    import MobileHeader from '../Mobile/MobileHeader.svelte'
+    import MobileBody from '../Mobile/MobileBody.svelte'
+    import MobileFooter from '../Mobile/MobileFooter.svelte'
+    import RealmMain from '../UI/Realm/RealmMain.svelte'
+    import StageTabBar from './StageTabBar.svelte'
+    import StageHome from './StageHome.svelte'
+    import StageChats from './StageChats.svelte'
+    import StageYou from './StageYou.svelte'
+    import { stageNav } from './stageNav.svelte'
+
+    // "Import from Realm" in Risu's add-character dialog asks the app to show Realm.
+    $effect(() => {
+        if ($OpenRealmStore) {
+            stageNav.tab = 'realm'
+            OpenRealmStore.set(false)
+        }
+    })
+</script>
+
+<div class="stage-root">
+    {#if $selectedCharID >= 0}
+        <!-- Phase 1: the chat keeps Risu's mobile screen until the Stage play screen lands (phase 4). -->
+        <div class="stage-legacy-chat">
+            <MobileHeader />
+            <MobileBody />
+            <MobileFooter />
+        </div>
+    {:else}
+        <div class="stage-shell">
+            <div class="stage-page">
+                {#if stageNav.tab === 'home'}
+                    <StageHome />
+                {:else if stageNav.tab === 'chats'}
+                    <StageChats />
+                {:else if stageNav.tab === 'realm'}
+                    <div class="stage-realm"><RealmMain /></div>
+                {:else}
+                    <StageYou />
+                {/if}
+            </div>
+            <StageTabBar />
+        </div>
+    {/if}
+</div>
+
+<style>
+    /* Palette derived from the user's color scheme, so every Risu color preset still works. */
+    .stage-root {
+        --stage-bg: var(--risu-theme-darkbg);
+        --stage-surface: color-mix(in oklab, var(--risu-theme-darkbg) 90%, var(--risu-theme-textcolor));
+        --stage-raised: color-mix(in oklab, var(--risu-theme-darkbg) 82%, var(--risu-theme-textcolor));
+        --stage-line: color-mix(in oklab, var(--risu-theme-textcolor) 9%, transparent);
+        --stage-muted: var(--risu-theme-textcolor2);
+        --stage-accent: #5b8cff;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        background: color-mix(in oklab, var(--risu-theme-darkbg) 80%, #000);
+        color: var(--risu-theme-textcolor);
+    }
+    .stage-legacy-chat {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+    }
+    /* Phone width everywhere; on a wide screen the app sits in a centered column. */
+    .stage-shell {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 640px;
+        height: 100%;
+        margin: 0 auto;
+        background: var(--stage-bg);
+    }
+    @media (min-width: 700px) {
+        .stage-shell {
+            border-left: 1px solid var(--stage-line);
+            border-right: 1px solid var(--stage-line);
+        }
+    }
+    .stage-page {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+    }
+    .stage-realm {
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    /* Shared building blocks for the Stage pages. */
+    .stage-root :global(.stage-scroll) {
+        height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 0 16px 28px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+    .stage-root :global(.stage-head) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 22px 0 14px;
+        padding-top: calc(22px + env(safe-area-inset-top, 0px));
+    }
+    .stage-root :global(.stage-head h1) {
+        margin: 0;
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+    .stage-root :global(.stage-toptabs) {
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+        min-width: 0;
+    }
+    .stage-root :global(.stage-toptabs button) {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: color-mix(in oklab, var(--risu-theme-textcolor) 35%, transparent);
+    }
+    .stage-root :global(.stage-toptabs button.on) {
+        color: var(--risu-theme-textcolor);
+    }
+    .stage-root :global(.stage-icon-btn) {
+        flex: none;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+    }
+    .stage-root :global(.stage-icon-btn:active) {
+        background: var(--stage-surface);
+    }
+    .stage-root :global(.stage-empty) {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 40px 8px;
+        text-align: center;
+        color: var(--stage-muted);
+        font-size: 15px;
+        line-height: 1.5;
+    }
+    .stage-root :global(.stage-empty b) {
+        color: var(--risu-theme-textcolor);
+        font-size: 18px;
+    }
+    .stage-root :global(button:focus-visible) {
+        outline: 2px solid var(--stage-accent);
+        outline-offset: 2px;
+    }
+</style>
