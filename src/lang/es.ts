@@ -1706,6 +1706,8 @@ export const languageSpanish = {
         drama: "Drama",
         previous: "Anterior",
         next: "Siguiente",
+        writing: "Escribiendo…",
+        dramaLoreName: "🎭 Stage · Formato de Drama",
         showIn: "Mostrar en",
         kindDetected: "Detectado a partir de la tarjeta. Cámbialo si va en la otra lista.",
         kindChosen: "Elegido por ti.",

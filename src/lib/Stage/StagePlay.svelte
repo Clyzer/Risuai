@@ -6,8 +6,8 @@
     // Cards such as Argenta put position:fixed panels inside their messages, so no element that
     // wraps the messages may use transform, filter, backdrop-filter, perspective, contain or
     // will-change: any of those would pin those panels to the wrapper instead of the screen.
-    import { ArrowLeftIcon, ChevronsLeftIcon, ChevronsRightIcon, MenuIcon } from '@lucide/svelte'
-    import { onDestroy, untrack } from 'svelte'
+    import { ArrowLeftIcon, MenuIcon } from '@lucide/svelte'
+    import { untrack } from 'svelte'
     import { language } from 'src/lang'
     import { DBState, selectedCharID } from 'src/ts/stores.svelte'
     import DefaultChatScreen from '../ChatScreens/DefaultChatScreen.svelte'
@@ -23,7 +23,11 @@
     import { stageNav } from './stageNav.svelte'
     import { backLayer } from './stageBack'
     import { stageKind } from './stageKinds'
-    import { applyStep, buildSteps, clearMarks, isInteractiveTarget, readMode, saveMode, type DramaStep } from './stageDrama'
+    import { readMode, saveMode, setDramaFormat } from './stageDrama'
+    import StageVn from './StageVn.svelte'
+    import { doingChat } from 'src/ts/process/index.svelte'
+    import { getUserName } from 'src/ts/util'
+    import { getCharImage } from 'src/ts/characters'
 
     let openChatList = $state(false)
     let openModuleList = $state(false)
@@ -40,12 +44,25 @@
     // ---- Novel / Drama ----
     let mode = $state<'novel' | 'drama'>('novel')
     let playEl: HTMLElement | undefined = $state()
-    let steps: DramaStep[] = []
-    let stepIndex = $state(0)
-    let stepCount = $state(0)
-    let newestIndex = -Infinity
-    let observer: MutationObserver | null = null
-    let rebuildTimer: ReturnType<typeof setTimeout> | null = null
+    let chatRoot = $state<HTMLElement | null>(null)
+    let vnActive = $state(false)
+    let fallbackSpeaker = $derived(char && char.type !== 'group' && stageKind(char) === 'chat' ? char.name : null)
+
+    // The character's own image, for Drama lines without pictures.
+    let portrait = $state<string | null>(null)
+    $effect(() => {
+        const image = char?.image
+        let cancelled = false
+        portrait = null
+        if (image) {
+            getCharImage(image, 'plain').then((url) => {
+                if (!cancelled) portrait = url || null
+            })
+        }
+        return () => {
+            cancelled = true
+        }
+    })
 
     let currentChaId = ''
     $effect(() => {
@@ -56,93 +73,32 @@
         }
     })
 
-    function chatRoot() {
-        return playEl?.querySelector<HTMLElement>('.default-chat-screen') ?? null
-    }
-
-    function firstStepOf(index: number) {
-        return steps.findIndex((s) => s.index === index)
-    }
-
-    /** Recomputes the steps. A new message jumps to its first step; otherwise the place is kept. */
-    function rebuild(startAtNewest = false) {
-        const root = chatRoot()
-        if (!root || mode !== 'drama') return
-        const before = steps[stepIndex]
-        steps = buildSteps(root)
-        stepCount = steps.length
-        const newest = steps.length ? steps[steps.length - 1].index : -Infinity
-        if (startAtNewest || newest > newestIndex) {
-            stepIndex = Math.max(0, firstStepOf(newest))
-        } else if (before) {
-            const same = steps.findIndex((s) => s.message === before.message && (s.blocks?.[0] ?? null) === (before.blocks?.[0] ?? null))
-            stepIndex = same >= 0 ? same : Math.min(stepIndex, Math.max(0, steps.length - 1))
+    // Risu's chat list (.default-chat-screen) appears once DefaultChatScreen has rendered.
+    $effect(() => {
+        void chat
+        const el = playEl
+        if (!el) return
+        let frames = 0
+        let raf = 0
+        const find = () => {
+            const found = el.querySelector<HTMLElement>('.default-chat-screen')
+            if (found || frames++ > 60) chatRoot = found
+            else raf = requestAnimationFrame(find)
         }
-        newestIndex = newest
-        applyStep(root, steps[stepIndex])
-    }
+        find()
+        return () => cancelAnimationFrame(raf)
+    })
 
-    function scheduleRebuild() {
-        if (rebuildTimer) clearTimeout(rebuildTimer)
-        rebuildTimer = setTimeout(() => rebuild(false), 150)
-    }
-
-    function go(delta: number) {
-        if (steps.length === 0) return
-        stepIndex = Math.min(Math.max(0, stepIndex + delta), steps.length - 1)
-        const root = chatRoot()
-        if (root) applyStep(root, steps[stepIndex])
-    }
+    // Drama adds its format note to this playthrough's own lorebook; Novel removes it.
+    $effect(() => {
+        const c = chat
+        const drama = mode === 'drama'
+        if (c) untrack(() => setDramaFormat(c, drama))
+    })
 
     function setMode(next: 'novel' | 'drama') {
         mode = next
         if (char?.chaId) saveMode(char.chaId, next)
-    }
-
-    // Start or stop the step controller when the mode or the chat changes.
-    $effect(() => {
-        const active = mode === 'drama'
-        const root = chatRoot()
-        void chat
-        observer?.disconnect()
-        observer = null
-        if (!root) return
-        if (!active) {
-            clearMarks(root)
-            return
-        }
-        // untrack: rebuild reads stepIndex, which must not restart this effect on every step.
-        untrack(() => {
-            newestIndex = -Infinity
-            rebuild(true)
-        })
-        // Only structure changes (new messages, streamed blocks, the card re-rendering). Our own
-        // class changes are attribute changes and do not retrigger this.
-        observer = new MutationObserver(scheduleRebuild)
-        observer.observe(root, { childList: true, subtree: true })
-    })
-
-    onDestroy(() => {
-        observer?.disconnect()
-        if (rebuildTimer) clearTimeout(rebuildTimer)
-    })
-
-    function onStageTap(e: MouseEvent) {
-        if (mode !== 'drama' || isInteractiveTarget(e.target)) return
-        go(1)
-    }
-
-    function onKey(e: KeyboardEvent) {
-        if (mode !== 'drama') return
-        const t = e.target as HTMLElement
-        if (t?.closest?.('textarea,input,[contenteditable]')) return
-        if (e.key === 'ArrowRight' || e.key === ' ') {
-            go(1)
-            e.preventDefault()
-        } else if (e.key === 'ArrowLeft') {
-            go(-1)
-            e.preventDefault()
-        }
     }
 
     // Back goes where the player came from: the story page for stories, the Chats list for chats.
@@ -203,19 +159,23 @@
 {#if char}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="stage-play" class:drama={mode === 'drama'} bind:this={playEl} onscrollcapture={onScroll} style:--stage-top-space={indicators.length > 0 ? '100px' : '56px'}>
+    <div class="stage-play" class:vn={mode === 'drama' && vnActive} bind:this={playEl} onscrollcapture={onScroll} style:--stage-top-space={indicators.length > 0 ? '100px' : '56px'}>
         <div class="stage-play-bg"><BackgroundDom /></div>
-        <div class="stage-play-chat" onclick={onStageTap}>
+        <div class="stage-play-chat">
             <DefaultChatScreen bind:openChatList bind:openModuleList />
+            {#if mode === 'drama'}
+                <StageVn
+                    root={chatRoot}
+                    chatKey={`${char.chaId}:${char.chatPage}`}
+                    {fallbackSpeaker}
+                    userName={getUserName()}
+                    generating={$doingChat}
+                    {portrait}
+                    portraitInFront={fallbackSpeaker !== null}
+                    bind:active={vnActive}
+                />
+            {/if}
         </div>
-
-        {#if mode === 'drama' && stepCount > 0}
-            <div class="stage-drama-nav">
-                <button aria-label={language.stage.previous} disabled={stepIndex === 0} onclick={() => go(-1)}><ChevronsLeftIcon size={20} /></button>
-                <span>{stepIndex + 1} / {stepCount}</span>
-                <button aria-label={language.stage.next} disabled={stepIndex >= stepCount - 1} onclick={() => go(1)}><ChevronsRightIcon size={20} /></button>
-            </div>
-        {/if}
 
         <header class="stage-play-top" class:hidden={barHidden}>
             <button class="stage-play-btn" aria-label={language.stage.back} onclick={back}>
@@ -284,7 +244,6 @@
     {/if}
 {/if}
 
-<svelte:window onkeydown={onKey} />
 
 <style>
     .stage-play {
@@ -355,71 +314,19 @@
         color: var(--stage-muted);
         font-size: 13px;
     }
-    /* ---- Drama: one block per screen, centered. Hiding only (no clones) keeps the card working. ---- */
-    /* The list is column-reverse: flex-start keeps the input at the bottom, and auto margins
-       center the visible message in the space above it. */
-    .stage-play.drama :global(.default-chat-screen) {
-        justify-content: flex-start;
+    /* ---- Drama: the visual novel (StageVn) covers the chat, which stays mounted but invisible so
+       the card's scripts, buttons and fixed panels (marked stage-vn-keep) keep working. ---- */
+    .stage-play.vn :global(.default-chat-screen) {
+        visibility: hidden;
+        overflow: hidden;
     }
-    .stage-play.drama :global(.default-chat-screen > :is(.stage-drama-msg, :has(.stage-drama-msg))) {
-        margin-top: auto;
-        margin-bottom: auto;
+    .stage-play.vn :global(.default-chat-screen > .risu-chat-input-bar),
+    .stage-play.vn :global(.stage-vn-keep) {
+        visibility: visible;
     }
-    .stage-play.drama :global(.default-chat-screen > :not(.risu-chat-input-bar):not(.stage-drama-msg):not(:has(.stage-drama-msg))) {
+    /* The creator's notes live on the story page; Risu's note card does not repeat them here. */
+    .stage-play :global(.risu-creator-quote) {
         display: none;
-    }
-    .stage-play.drama :global(.risu-chat:not(.stage-drama-msg)) {
-        display: none;
-    }
-    .stage-play.drama :global(.stage-drama-msg:not(.stage-drama-whole) .chattext > :not(.stage-drama-on):not(.stage-drama-keep)) {
-        display: none;
-    }
-    .stage-play.drama :global(.stage-drama-msg .risu-stage-tools) {
-        display: none;
-    }
-    .stage-play.drama :global(.stage-drama-on) {
-        animation: stage-drama-in 0.25s ease-out;
-    }
-    @keyframes -global-stage-drama-in {
-        from {
-            opacity: 0;
-        }
-    }
-    @media (prefers-reduced-motion: reduce) {
-        .stage-play.drama :global(.stage-drama-on) {
-            animation: none;
-        }
-    }
-    .stage-drama-nav {
-        position: absolute;
-        left: 50%;
-        bottom: calc(84px + env(safe-area-inset-bottom, 0px));
-        z-index: 35;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px;
-        border-radius: 999px;
-        background: color-mix(in oklab, var(--stage-bg) 88%, transparent);
-        border: 1px solid var(--stage-line);
-        translate: -50% 0;
-        font-size: 13px;
-        font-weight: 600;
-        font-variant-numeric: tabular-nums;
-    }
-    .stage-drama-nav span {
-        min-width: 56px;
-        text-align: center;
-    }
-    .stage-drama-nav button {
-        width: 40px;
-        height: 40px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-    }
-    .stage-drama-nav button:disabled {
-        opacity: 0.3;
     }
     .stage-mode {
         flex: none;
